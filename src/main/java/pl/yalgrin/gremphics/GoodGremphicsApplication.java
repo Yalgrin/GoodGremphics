@@ -10,7 +10,7 @@ public class GoodGremphicsApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(GoodGremphicsApplication.class.getClassLoader().getResource("layout/main_window_layout.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(GoodGremphicsApplication.class.getClassLoader().getResource("layout/main_window.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage.setTitle("Good Gremphics");
         primaryStage.setScene(new Scene(root, 500, 500));
