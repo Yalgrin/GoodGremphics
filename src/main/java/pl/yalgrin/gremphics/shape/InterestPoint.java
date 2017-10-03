@@ -1,9 +1,11 @@
 package pl.yalgrin.gremphics.shape;
 
-import java.awt.*;
+import javafx.beans.property.IntegerProperty;
 
 public abstract class InterestPoint {
-    public abstract Point getPoint();
+    public abstract IntegerProperty XProperty();
+
+    public abstract IntegerProperty YProperty();
 
     public abstract void onMoved(int x, int y);
 }

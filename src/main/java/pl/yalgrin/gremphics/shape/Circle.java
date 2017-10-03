@@ -2,12 +2,20 @@ package pl.yalgrin.gremphics.shape;
 
 import javafx.scene.input.MouseEvent;
 
-public class Line extends javafx.scene.shape.Line implements IShape {
+public class Circle extends javafx.scene.shape.Circle implements ICircle {
     private boolean isDragging = false;
     private int lastX, lastY;
 
-    public Line() {
-        super(250, 250, 300, 300);
+    public Circle() {
+        super(50, 50, 100);
+
+        setStart(200, 200);
+        circleRadiusProperty().set(100);
+
+        centerXProperty().bind(startXProperty);
+        centerYProperty().bind(startYProperty);
+        radiusProperty().bind(circleRadiusProperty());
+        radiusProperty().bind(circleRadiusProperty());
 
         setOnMouseDragged(this::onDrag);
         setOnMouseReleased(this::onRelease);
@@ -26,10 +34,8 @@ public class Line extends javafx.scene.shape.Line implements IShape {
         int xDiff = (int) event.getX() - lastX;
         int yDiff = (int) event.getY() - lastY;
 
-        startXProperty().set(startXProperty().getValue() + xDiff);
-        startYProperty().set(startYProperty().getValue() + yDiff);
-        endXProperty().set(endXProperty().getValue() + xDiff);
-        endYProperty().set(endYProperty().getValue() + yDiff);
+        startXProperty.set(startXProperty.getValue() + xDiff);
+        startYProperty.set(startYProperty.getValue() + yDiff);
 
         lastX = (int) event.getX();
         lastY = (int) event.getY();
