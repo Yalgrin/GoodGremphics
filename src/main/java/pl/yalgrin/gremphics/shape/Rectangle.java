@@ -1,16 +1,24 @@
 package pl.yalgrin.gremphics.shape;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
 
-public class Rectangle extends javafx.scene.shape.Rectangle implements IRectangle {
+import java.util.Arrays;
+import java.util.List;
+
+public class Rectangle extends javafx.scene.shape.Rectangle implements IShape {
     private boolean isDragging = false;
     private int lastX, lastY;
 
+    private IntegerProperty startXProperty = new SimpleIntegerProperty(0);
+    private IntegerProperty startYProperty = new SimpleIntegerProperty(0);
+    private IntegerProperty endXProperty = new SimpleIntegerProperty(0);
+    private IntegerProperty endYProperty = new SimpleIntegerProperty(0);
+
+
     public Rectangle() {
         super(50, 50, 100, 100);
-
-        setStart(50, 50);
-        setEnd(200, 200);
 
         xProperty().bind(startXProperty);
         yProperty().bind(startYProperty);
@@ -47,7 +55,27 @@ public class Rectangle extends javafx.scene.shape.Rectangle implements IRectangl
         isDragging = false;
     }
 
-    @Override public InterestPoint getInterestPoint() {
-        return null;
+    public IntegerProperty startXProperty() {
+        return startXProperty;
+    }
+
+    public IntegerProperty startYProperty() {
+        return startYProperty;
+    }
+
+    public IntegerProperty endXProperty() {
+        return endXProperty;
+    }
+
+    public IntegerProperty endYProperty() {
+        return endYProperty;
+    }
+
+    @Override
+    public List<NamedProperty> getBoundProperties() {
+        return Arrays.asList(new NamedProperty("START_X", startXProperty()),
+                new NamedProperty("START_Y", startYProperty()),
+                new NamedProperty("END_X", endXProperty()),
+                new NamedProperty("END_Y", endYProperty()));
     }
 }

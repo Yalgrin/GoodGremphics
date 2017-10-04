@@ -2,20 +2,19 @@ package pl.yalgrin.gremphics.shape;
 
 import javafx.scene.input.MouseEvent;
 
-public class Circle extends javafx.scene.shape.Circle implements ICircle {
+import java.util.Arrays;
+import java.util.List;
+
+public class Circle extends javafx.scene.shape.Circle implements IShape {
     private boolean isDragging = false;
     private int lastX, lastY;
 
     public Circle() {
         super(50, 50, 100);
 
-        setStart(200, 200);
-        circleRadiusProperty().set(100);
-
-        centerXProperty().bind(startXProperty);
-        centerYProperty().bind(startYProperty);
-        radiusProperty().bind(circleRadiusProperty());
-        radiusProperty().bind(circleRadiusProperty());
+        setCenterX(200);
+        setCenterY(200);
+        radiusProperty().set(100);
 
         setOnMouseDragged(this::onDrag);
         setOnMouseReleased(this::onRelease);
@@ -34,8 +33,8 @@ public class Circle extends javafx.scene.shape.Circle implements ICircle {
         int xDiff = (int) event.getX() - lastX;
         int yDiff = (int) event.getY() - lastY;
 
-        startXProperty.set(startXProperty.getValue() + xDiff);
-        startYProperty.set(startYProperty.getValue() + yDiff);
+        centerXProperty().set(centerXProperty().getValue() + xDiff);
+        centerYProperty().set(centerYProperty().getValue() + yDiff);
 
         lastX = (int) event.getX();
         lastY = (int) event.getY();
@@ -45,7 +44,10 @@ public class Circle extends javafx.scene.shape.Circle implements ICircle {
         isDragging = false;
     }
 
-    @Override public InterestPoint getInterestPoint() {
-        return null;
+    @Override
+    public List<NamedProperty> getBoundProperties() {
+        return Arrays.asList(new NamedProperty("CENTER_X", centerXProperty()),
+                new NamedProperty("CENTER_Y", centerYProperty()),
+                new NamedProperty("RADIUS", radiusProperty()));
     }
 }

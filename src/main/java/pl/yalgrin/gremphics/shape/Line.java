@@ -2,6 +2,9 @@ package pl.yalgrin.gremphics.shape;
 
 import javafx.scene.input.MouseEvent;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Line extends javafx.scene.shape.Line implements IShape {
     private boolean isDragging = false;
     private int lastX, lastY;
@@ -39,7 +42,11 @@ public class Line extends javafx.scene.shape.Line implements IShape {
         isDragging = false;
     }
 
-    @Override public InterestPoint getInterestPoint() {
-        return null;
+    @Override
+    public List<NamedProperty> getBoundProperties() {
+        return Arrays.asList(new NamedProperty("START_X", startXProperty()),
+                new NamedProperty("START_Y", startYProperty()),
+                new NamedProperty("END_X", endXProperty()),
+                new NamedProperty("END_Y", endYProperty()));
     }
 }
