@@ -4,9 +4,11 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Shape;
+import pl.yalgrin.gremphics.shape.IShape;
 
 public class CanvasHolder extends Pane {
-    private Canvas canvas = new Canvas(500, 500);
+    private Canvas canvas = new Canvas(1000, 1000);
+    private Shape currentlyDraggedShape;
 
     public CanvasHolder() {
         super();
@@ -34,7 +36,37 @@ public class CanvasHolder extends Pane {
         return null;
     }
 
+    public void setDraggingEnabled(boolean enabled) {
+        for (Node child : getChildren()) {
+            if (child == canvas) {
+                continue;
+            }
+
+            IShape shape = (IShape) child;
+            shape.setDragging(enabled);
+        }
+    }
+
     public void removeShape(Shape shape) {
         getChildren().removeAll(shape);
+    }
+
+    public void startDrag(Shape shape) {
+        if (currentlyDraggedShape != null) {
+            getChildren().removeAll(currentlyDraggedShape);
+        }
+        currentlyDraggedShape = shape;
+        getChildren().add(currentlyDraggedShape);
+    }
+
+    public void cancelDrag() {
+        if (currentlyDraggedShape != null) {
+            getChildren().removeAll(currentlyDraggedShape);
+        }
+        currentlyDraggedShape = null;
+    }
+
+    public void endDrag() {
+        currentlyDraggedShape = null;
     }
 }

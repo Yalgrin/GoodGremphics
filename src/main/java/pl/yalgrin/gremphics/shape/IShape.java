@@ -4,4 +4,6 @@ import java.util.List;
 
 public interface IShape {
     public List<NamedProperty> getBoundProperties();
+
+    public void setDragging(boolean enabled);
 }

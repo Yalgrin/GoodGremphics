@@ -1,5 +1,6 @@
 package pl.yalgrin.gremphics.shape;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.List;
 
 public class Line extends javafx.scene.shape.Line implements IShape {
     private boolean isDragging = false;
+    private boolean draggingEnabled = false;
     private int lastX, lastY;
 
     public Line() {
@@ -17,7 +19,9 @@ public class Line extends javafx.scene.shape.Line implements IShape {
     }
 
     private void onDrag(MouseEvent event) {
-        System.out.println(event.getX() + " " + event.getY());
+        if (event.getButton() != MouseButton.PRIMARY || !draggingEnabled) {
+            return;
+        }
 
         if (!isDragging) {
             lastX = (int) event.getX();
@@ -48,5 +52,10 @@ public class Line extends javafx.scene.shape.Line implements IShape {
                 new NamedProperty("START_Y", startYProperty()),
                 new NamedProperty("END_X", endXProperty()),
                 new NamedProperty("END_Y", endYProperty()));
+    }
+
+    @Override
+    public void setDragging(boolean enabled) {
+        draggingEnabled = enabled;
     }
 }

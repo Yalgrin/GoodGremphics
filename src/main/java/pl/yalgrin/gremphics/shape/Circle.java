@@ -1,5 +1,6 @@
 package pl.yalgrin.gremphics.shape;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.List;
 
 public class Circle extends javafx.scene.shape.Circle implements IShape {
     private boolean isDragging = false;
+    private boolean draggingEnabled = false;
     private int lastX, lastY;
 
     public Circle() {
@@ -21,7 +23,9 @@ public class Circle extends javafx.scene.shape.Circle implements IShape {
     }
 
     private void onDrag(MouseEvent event) {
-        System.out.println(event.getX() + " " + event.getY());
+        if (event.getButton() != MouseButton.PRIMARY || !draggingEnabled) {
+            return;
+        }
 
         if (!isDragging) {
             lastX = (int) event.getX();
@@ -49,5 +53,10 @@ public class Circle extends javafx.scene.shape.Circle implements IShape {
         return Arrays.asList(new NamedProperty("CENTER_X", centerXProperty()),
                 new NamedProperty("CENTER_Y", centerYProperty()),
                 new NamedProperty("RADIUS", radiusProperty()));
+    }
+
+    @Override
+    public void setDragging(boolean enabled) {
+        draggingEnabled = enabled;
     }
 }
