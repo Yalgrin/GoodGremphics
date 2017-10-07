@@ -2,6 +2,7 @@ package pl.yalgrin.gremphics.controller;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -165,6 +166,7 @@ public class EditorViewController extends AbstractController {
                 lastSelectedButton = button;
                 button.setDisable(true);
             });
+            FlowPane.setMargin(button, new Insets(5));
             buttonPane.getChildren().add(button);
         }
     }
@@ -182,7 +184,9 @@ public class EditorViewController extends AbstractController {
         for (NamedProperty namedProperty : shape.getBoundProperties()) {
             HBox hBox = new HBox();
             Label label = new Label(namedProperty.getName());
+            HBox.setMargin(label, new Insets(5));
             Spinner<Integer> spinner = new Spinner<>(0, 1000, 1);
+            HBox.setMargin(spinner, new Insets(5));
             spinner.setEditable(true);
             IntegerProperty.integerProperty(spinner.getValueFactory().valueProperty()).bindBidirectional(namedProperty.propertyProperty());
             hBox.getChildren().add(label);
@@ -194,6 +198,7 @@ public class EditorViewController extends AbstractController {
             canvasHolder.removeShape((Shape) shape);
             unbindProperties((Shape) shape);
         });
+        FlowPane.setMargin(button, new Insets(5));
         propertyPane.getChildren().add(button);
     }
 }
