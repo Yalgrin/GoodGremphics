@@ -16,14 +16,14 @@ public class CanvasHolder extends Pane {
     }
 
     public void addShape(Shape shape) {
-        System.out.println(shape.hashCode());
         getChildren().add(shape);
-        System.out.println(getChildren());
         canvas.toBack();
     }
 
     public Shape getShapeAt(int x, int y) {
-        for (Node child : getChildren()) {
+        for (int i = getChildren().size() - 1; i >= 0; i--) {
+            Node child = getChildren().get(i);
+
             if (child == canvas) {
                 continue;
             }

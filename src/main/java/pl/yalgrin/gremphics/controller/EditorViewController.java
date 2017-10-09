@@ -81,8 +81,6 @@ public class EditorViewController extends AbstractController {
                     rect.endYProperty().set((int) e.getY());
                     rect.startXProperty().set(dragStartX.intValue());
                     rect.startYProperty().set(dragStartY.intValue());
-                    System.out.println("START: " + dragStartX.intValue() + ", " + dragStartY.intValue());
-                    System.out.println("START: " + e.getX() + ", " + e.getY());
                     shape = rect;
                     break;
             }
@@ -91,13 +89,11 @@ public class EditorViewController extends AbstractController {
                 canvasHolder.startDrag(shape);
             }
 
-            System.out.println(e.getX() + ", " + e.getY());
         });
         canvasHolder.setOnMousePressed(e -> {
             if (e.getButton() != MouseButton.PRIMARY) {
                 return;
             }
-            System.out.println("PRESS:" + e.getX() + ", " + e.getY());
             dragStartX = e.getX();
             dragStartY = e.getY();
             dragStartTime = System.currentTimeMillis();
@@ -106,7 +102,7 @@ public class EditorViewController extends AbstractController {
             if (e.getButton() != MouseButton.PRIMARY) {
                 return;
             }
-            System.out.println("RELEASE:" + e.getX() + ", " + e.getY());
+
             if (System.currentTimeMillis() - dragStartTime < 100 &&
                     Math.abs(e.getX() - dragStartX) < 5 && Math.abs(e.getY() - dragStartY) < 5) {
                 canvasHolder.cancelDrag();
@@ -180,7 +176,6 @@ public class EditorViewController extends AbstractController {
     }
 
     private void setupProperties(IShape shape) {
-        System.out.println(shape.getBoundProperties());
         for (NamedProperty namedProperty : shape.getBoundProperties()) {
             HBox hBox = new HBox();
             Label label = new Label(namedProperty.getName());

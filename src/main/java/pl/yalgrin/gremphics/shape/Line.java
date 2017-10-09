@@ -14,6 +14,12 @@ public class Line extends javafx.scene.shape.Line implements IShape {
     public Line() {
         super(250, 250, 300, 300);
 
+        strokeWidthProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.doubleValue() < 1.0) {
+                strokeWidthProperty().set(1.0);
+            }
+        });
+
         setOnMouseDragged(this::onDrag);
         setOnMouseReleased(this::onRelease);
     }
@@ -51,7 +57,8 @@ public class Line extends javafx.scene.shape.Line implements IShape {
         return Arrays.asList(new NamedProperty("START_X", startXProperty()),
                 new NamedProperty("START_Y", startYProperty()),
                 new NamedProperty("END_X", endXProperty()),
-                new NamedProperty("END_Y", endYProperty()));
+                new NamedProperty("END_Y", endYProperty()),
+                new NamedProperty("WIDTH", strokeWidthProperty()));
     }
 
     @Override
