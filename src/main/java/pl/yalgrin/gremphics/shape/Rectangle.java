@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,8 @@ public class Rectangle extends javafx.scene.shape.Rectangle implements IShape {
         yProperty().bind(startYProperty);
         widthProperty().bind(endXProperty.subtract(startXProperty));
         heightProperty().bind(endYProperty.subtract(startYProperty));
+
+        setFill(Color.RED);
 
         setOnMouseDragged(this::onDrag);
         setOnMouseReleased(this::onRelease);

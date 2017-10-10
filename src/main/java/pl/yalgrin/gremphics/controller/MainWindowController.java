@@ -7,7 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import pl.yalgrin.gremphics.io.ImageIO;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -26,7 +28,7 @@ public class MainWindowController extends AbstractController {
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
         try {
-            loadContentPane("layout/editor_view.fxml");
+            loadContentPane("layout/shapes_view.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,11 +73,13 @@ public class MainWindowController extends AbstractController {
     @FXML
     public void loadFile() throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Sudoku file");
+        fileChooser.setTitle("Open image file");
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
+            BufferedImage image = ImageIO.readImage(file);
             loadContentPane("layout/editor_view.fxml", c -> {
                 EditorViewController controller = (EditorViewController) c;
+                controller.setImage(image);
             });
         }
     }
