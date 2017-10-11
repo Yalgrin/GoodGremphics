@@ -1,77 +1,113 @@
 package pl.yalgrin.gremphics.io;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class ImageIO {
-    public static BufferedImage readImage(File file) throws IOException {
+    public static Image readImage(File file) throws IOException {
         String extension = getFileExtension(file);
         if (extension.equals("ppm")) {
-            return readPPMImage(file);
+            return SwingFXUtils.toFXImage(readPPMImage(file), null);
         }
-        return javax.imageio.ImageIO.read(file);
+        return SwingFXUtils.toFXImage(javax.imageio.ImageIO.read(file), null);
     }
 
     private static BufferedImage readPPMImage(File file) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "US-ASCII"))) {
-            String type = readLineWithoutComments(reader);
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            String type = readUncommentedPart(fileInputStream);
             int maxBytesPerPixel;
+            boolean readPlainText = false;
             if (type.equals("P3")) {
-                maxBytesPerPixel = 1;
+                readPlainText = true;
             } else if (type.equals("P6")) {
-                maxBytesPerPixel = 2;
+                readPlainText = false;
             } else {
                 throw new IOException("Shit happened");
             }
-            String dimensions = readLineWithoutComments(reader);
-            String[] dims = dimensions.split("\\s+");
-            int[] dimValues = new int[]{Integer.parseInt(dims[0]), Integer.parseInt(dims[1])};
-            ImageDTO imageDTO = new ImageDTO(dimValues[0], dimValues[1]);
-            int maxValue = Integer.parseInt(readLineWithoutComments(reader));
-            if (maxValue > (2 << (maxBytesPerPixel * 8)) - 1) {
-                throw new IOException("TOO BIG");
+            int dimX = Integer.parseInt(readUncommentedPart(fileInputStream));
+            int dimY = Integer.parseInt(readUncommentedPart(fileInputStream));
+            ImageDTO imageDTO = new ImageDTO(dimX, dimY);
+            int maxValue = Integer.parseInt(readUncommentedPart(fileInputStream));
+            int numOfBytes;
+            if (maxValue >= (1 << 16)) {
+                throw new IOException("TOO BIG VALUE");
+            } else if (maxValue >= (1 << 8)) {
+                numOfBytes = 2;
+            } else {
+                numOfBytes = 1;
             }
-            int bytesPer = 0;
-            while (maxValue > 0) {
-                maxValue >>= 8;
-                bytesPer++;
-            }
-            int bytesPerRead = dimValues[0] * 3 * bytesPer;
-            char[] buffer = new char[bytesPerRead];
-            int x = 0, y = 0;
-            int bytesRead = 0;
-            for (int i = 0; i < dimValues[1]; i++) {
-                bytesRead = reader.read(buffer, 0, bytesPerRead);
-                if (bytesRead < bytesPerRead) {
-                    throw new IOException("FILE IS SHIT");
-                }
-                int val = 0;
-                for (int k = 0; k < bytesPerRead; k += 3 * bytesPer) {
-                    for (int j = 0; j < bytesPer; j++) {
-                        val <<= 8;
-                        val += buffer[k + j];
-                    }
-                    imageDTO.getR()[x][y] = val;
-                    val = 0;
-                    for (int j = 0; j < bytesPer; j++) {
-                        val <<= 8;
-                        val += buffer[k + j + bytesPer];
-                    }
-                    imageDTO.getG()[x][y] = val;
-                    val = 0;
-                    for (int j = 0; j < bytesPer; j++) {
-                        val <<= 8;
-                        val += buffer[k + j + bytesPer * 2];
-                    }
-                    imageDTO.getB()[x][y] = val;
-                    x++;
-                    if (x == dimValues[0]) {
-                        x = 0;
-                        y++;
-                    }
-                }
+            if (readPlainText) {
+                readPlainTextPPM(imageDTO, fileInputStream, numOfBytes, maxValue);
+            } else {
+                readBinaryPPM(imageDTO, fileInputStream, numOfBytes, maxValue);
             }
             return imageDTOToBufImage(imageDTO);
+        }
+    }
+
+    private static void readPlainTextPPM(ImageDTO dto, InputStream reader, int numOfBytes, int maxValue) throws IOException {
+        //TODO: Optimize! ITS WAY TOO SLOW
+        int val;
+        for (int y = 0; y < dto.getHeight(); y++) {
+            for (int x = 0; x < dto.getWidth(); x++) {
+                val = Integer.parseInt(readUncommentedPart(reader));
+                if (val > maxValue) {
+                    throw new IOException("TOO BIG VALUE");
+                }
+                dto.getR()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+                val = Integer.parseInt(readUncommentedPart(reader));
+                if (val > maxValue) {
+                    throw new IOException("TOO BIG VALUE");
+                }
+                dto.getG()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+                val = Integer.parseInt(readUncommentedPart(reader));
+                if (val > maxValue) {
+                    throw new IOException("TOO BIG VALUE");
+                }
+                dto.getB()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+            }
+        }
+    }
+
+    private static void readBinaryPPM(ImageDTO imageDTO, InputStream inputStream, int numOfBytes, int maxValue) throws IOException {
+        int bytesPerRead = imageDTO.getWidth() * 3 * numOfBytes;
+        byte[] buffer = new byte[bytesPerRead];
+        int x = 0, y = 0;
+        int bytesRead = 0;
+        for (int i = 0; i < imageDTO.getHeight(); i++) {
+            bytesRead = inputStream.read(buffer, 0, bytesPerRead);
+            if (bytesRead < bytesPerRead) {
+                System.out.println("poop");
+                //throw new IOException("FILE IS SHIT");
+            }
+            int val = 0;
+            for (int k = 0; k < bytesPerRead; k += 3 * numOfBytes) {
+                for (int j = 0; j < numOfBytes; j++) {
+                    val <<= 8;
+                    val += (int) (buffer[k + j] & 0xFF);
+                }
+                imageDTO.getR()[x][y] = (int) (val * 256.0 / (maxValue + 1));
+                val = 0;
+                for (int j = 0; j < numOfBytes; j++) {
+                    val <<= 8;
+                    val += (int) (buffer[k + j + numOfBytes] & 0xFF);
+                }
+                imageDTO.getG()[x][y] = (int) (val * 256.0 / (maxValue + 1));
+                val = 0;
+                for (int j = 0; j < numOfBytes; j++) {
+                    val <<= 8;
+                    val += (int) (buffer[k + j + numOfBytes * 2] & 0xFF);
+                }
+                imageDTO.getB()[x][y] = (int) (val * 256.0 / (maxValue + 1));
+                x++;
+                if (x == imageDTO.getWidth()) {
+                    x = 0;
+                    y++;
+                }
+            }
         }
     }
 
@@ -81,6 +117,41 @@ public class ImageIO {
             return readLineWithoutComments(reader);
         }
         return line;
+    }
+
+    public static String readUncommentedPart(InputStream inputStream) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        char c;
+        int i;
+        boolean isComment = false;
+        while (Character.isWhitespace(c = (char) (i = inputStream.read()))) ;
+        while (true) {
+            if (c == '#') {
+                isComment = true;
+            }
+
+            if (isComment) {
+                if (c == '\n') {
+                    isComment = false;
+                    if (sb.length() > 0) {
+                        return sb.toString();
+                    }
+                }
+            } else {
+                if (!Character.isWhitespace(c)) {
+                    sb.append(c);
+                } else {
+                    if (sb.length() > 0) {
+                        return sb.toString();
+                    }
+                }
+            }
+
+            c = (char) (i = inputStream.read());
+            if (i == -1) {
+                return sb.toString();
+            }
+        }
     }
 
     private static BufferedImage imageDTOToBufImage(ImageDTO dto) {

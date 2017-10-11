@@ -4,12 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.yalgrin.gremphics.io.ImageIO;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -76,7 +76,7 @@ public class MainWindowController extends AbstractController {
         fileChooser.setTitle("Open image file");
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            BufferedImage image = ImageIO.readImage(file);
+            Image image = ImageIO.readImage(file);
             loadContentPane("layout/editor_view.fxml", c -> {
                 EditorViewController controller = (EditorViewController) c;
                 controller.setImage(image);

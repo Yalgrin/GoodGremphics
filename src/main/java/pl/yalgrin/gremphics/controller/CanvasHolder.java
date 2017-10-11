@@ -1,23 +1,57 @@
 package pl.yalgrin.gremphics.controller;
 
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
-
-import java.awt.image.BufferedImage;
 
 public class CanvasHolder extends Pane {
     private Canvas canvas;
-    private BufferedImage image;
+    private Image image;
+
+    private boolean isDragging = false;
+    private double lastX, lastY;
+    private double curShiftX, curShiftY;
+    private double curScale = 1;
 
     public CanvasHolder() {
 
     }
 
-    public void setImage(BufferedImage image) {
+    public void setImage(Image image) {
         this.image = image;
         canvas = new Canvas(image.getWidth(), image.getHeight());
-        canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(image, null), 0, 0);
+        canvas.getGraphicsContext2D().drawImage(image, 0, 0);
         getChildren().addAll(canvas);
+
+
+        setOnMouseDragged(e -> {
+            if (!isDragging) {
+                return;
+            }
+            curShiftX -= lastX - e.getX();
+            curShiftY -= lastY - e.getY();
+            curShiftX = Math.max(Math.min(curShiftX, 0), -5000);
+            curShiftY = Math.max(Math.min(curShiftY, 0), -5000);
+            canvas.relocate(curShiftX, curShiftY);
+            lastX = e.getX();
+            lastY = e.getY();
+            //FIXME Limit
+        });
+
+        setOnMousePressed(e -> {
+            isDragging = true;
+            lastX = e.getX();
+            lastY = e.getY();
+        });
+
+        setOnMouseReleased(e -> {
+            isDragging = false;
+        });
+
+        setOnScroll(e -> {
+            curScale *= Math.pow(1.05, e.getDeltaY() / 40.0);
+            canvas.setScaleX(curScale);
+            canvas.setScaleY(curScale);
+        });
     }
 }

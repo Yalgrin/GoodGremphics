@@ -2,10 +2,10 @@ package pl.yalgrin.gremphics.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -33,7 +33,7 @@ public class EditorViewController extends AbstractController {
         centerPane.getChildren().add(canvasHolder);
     }
 
-    public void setImage(BufferedImage image) {
+    public void setImage(Image image) {
         canvasHolder.setImage(image);
     }
 }
