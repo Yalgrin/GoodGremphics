@@ -7,6 +7,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class ImageIO {
+    private static final int MAX_BUFFER_SIZE = 1000000;
+    private static byte[] streamBuffer;
+    private static int bufferCounter = 1, bufferElements;
+
     public static Image readImage(File file) throws IOException {
         String extension = getFileExtension(file);
         if (extension.equals("ppm")) {
@@ -49,21 +53,20 @@ public class ImageIO {
     }
 
     private static void readPlainTextPPM(ImageDTO dto, InputStream reader, int numOfBytes, int maxValue) throws IOException {
-        //TODO: Optimize! ITS WAY TOO SLOW
         int val;
         for (int y = 0; y < dto.getHeight(); y++) {
             for (int x = 0; x < dto.getWidth(); x++) {
-                val = Integer.parseInt(readUncommentedPart(reader));
+                val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
                     throw new IOException("TOO BIG VALUE");
                 }
                 dto.getR()[x][y] = (int) (val * 255.0 / (maxValue + 1));
-                val = Integer.parseInt(readUncommentedPart(reader));
+                val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
                     throw new IOException("TOO BIG VALUE");
                 }
                 dto.getG()[x][y] = (int) (val * 255.0 / (maxValue + 1));
-                val = Integer.parseInt(readUncommentedPart(reader));
+                val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
                     throw new IOException("TOO BIG VALUE");
                 }
@@ -120,11 +123,15 @@ public class ImageIO {
     }
 
     public static String readUncommentedPart(InputStream inputStream) throws IOException {
+        return readUncommentedPart(inputStream, false, 0);
+    }
+
+    public static String readUncommentedPart(InputStream inputStream, boolean buffering, int bufferSize) throws IOException {
         StringBuilder sb = new StringBuilder();
         char c;
         int i;
         boolean isComment = false;
-        while (Character.isWhitespace(c = (char) (i = inputStream.read()))) ;
+        while (Character.isWhitespace(c = (char) (i = read(inputStream, buffering, bufferSize)))) ;
         while (true) {
             if (c == '#') {
                 isComment = true;
@@ -147,11 +154,34 @@ public class ImageIO {
                 }
             }
 
-            c = (char) (i = inputStream.read());
+            c = (char) (i = read(inputStream, buffering, bufferSize));
             if (i == -1) {
                 return sb.toString();
             }
         }
+    }
+
+    private static int read(InputStream inputStream, boolean buffering, int bufferSize) throws IOException {
+        if (buffering) {
+            return readBuffered(inputStream, bufferSize);
+        }
+        return readUnbuffered(inputStream);
+    }
+
+    private static int readBuffered(InputStream inputStream, int bufferSize) throws IOException {
+        bufferSize = Math.min(bufferSize, MAX_BUFFER_SIZE);
+        if (bufferCounter >= bufferElements) {
+            if (streamBuffer == null || streamBuffer.length != bufferSize) {
+                streamBuffer = new byte[bufferSize];
+            }
+            bufferElements = inputStream.read(streamBuffer, 0, bufferSize);
+            bufferCounter = 0;
+        }
+        return streamBuffer[bufferCounter++];
+    }
+
+    private static int readUnbuffered(InputStream inputStream) throws IOException {
+        return inputStream.read();
     }
 
     private static BufferedImage imageDTOToBufImage(ImageDTO dto) {

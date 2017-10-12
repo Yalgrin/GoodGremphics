@@ -30,12 +30,9 @@ public class CanvasHolder extends Pane {
             }
             curShiftX -= lastX - e.getX();
             curShiftY -= lastY - e.getY();
-            curShiftX = Math.max(Math.min(curShiftX, 0), -5000);
-            curShiftY = Math.max(Math.min(curShiftY, 0), -5000);
             canvas.relocate(curShiftX, curShiftY);
             lastX = e.getX();
             lastY = e.getY();
-            //FIXME Limit
         });
 
         setOnMousePressed(e -> {
