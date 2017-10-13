@@ -1,7 +1,6 @@
 package pl.yalgrin.gremphics.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
@@ -11,6 +10,8 @@ import java.util.ResourceBundle;
 
 public class EditorViewController extends AbstractController {
 
+    public static final String PARAM_IMAGE = "PARAM_IMAGE";
+
     @FXML
     private AnchorPane centerPane;
 
@@ -19,9 +20,6 @@ public class EditorViewController extends AbstractController {
 
     @FXML
     private FlowPane propertyPane;
-
-    @FXML
-    private Button selectButton;
 
     private CanvasHolder canvasHolder;
 
@@ -35,5 +33,6 @@ public class EditorViewController extends AbstractController {
 
     public void setImage(Image image) {
         canvasHolder.setImage(image);
+        controllerData.setParameter(PARAM_IMAGE, image);
     }
 }

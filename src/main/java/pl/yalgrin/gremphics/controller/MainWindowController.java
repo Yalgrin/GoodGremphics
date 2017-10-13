@@ -4,19 +4,28 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.yalgrin.gremphics.io.ImageIO;
+import pl.yalgrin.gremphics.io.ImageSaveParam;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class MainWindowController extends AbstractController {
+
+    public static final String PARAM_FILE = "PARAM_FILE";
 
     @FXML
     private BorderPane contentPane;
@@ -76,11 +85,58 @@ public class MainWindowController extends AbstractController {
         fileChooser.setTitle("Open image file");
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            Image image = ImageIO.readImage(file);
-            loadContentPane("layout/editor_view.fxml", c -> {
-                EditorViewController controller = (EditorViewController) c;
-                controller.setImage(image);
-            });
+            try {
+                Image image = ImageIO.readImage(file);
+                loadContentPane("layout/editor_view.fxml", c -> {
+                    EditorViewController controller = (EditorViewController) c;
+                    controller.setImage(image);
+                });
+            } catch (IOException ex) {
+                final StringWriter sw = new StringWriter();
+                final PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Error during load occured!");
+                alert.setContentText(ex.getMessage());
+                alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
+                alert.showAndWait();
+            }
+        }
+    }
+
+    @FXML
+    public void saveFile() throws IOException {
+        if (controllerData.getParameter(EditorViewController.PARAM_IMAGE) == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error during save occured!");
+            alert.setContentText("No image loaded!");
+            alert.showAndWait();
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save image file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JPEG image", "jpg", "jpeg"));
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            controllerData.setParameter(PARAM_FILE, file);
+            openWindow("Select compression", "layout/jpeg_options_view.fxml");
+        }
+    }
+
+    public void saveImage(Image image, File file, Map<ImageSaveParam, Object> params) {
+        try {
+            ImageIO.writeImage(file, image, params);
+        } catch (IOException ex) {
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            ex.printStackTrace(pw);
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error during save occured!");
+            alert.setContentText(ex.getMessage());
+            alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
+            alert.showAndWait();
         }
     }
 

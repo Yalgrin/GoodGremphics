@@ -2,11 +2,20 @@ package pl.yalgrin.gremphics.io;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import pl.yalgrin.gremphics.exception.PPMException;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.FileImageOutputStream;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Map;
 
 public class ImageIO {
+    private static final int READ_ERROR_VALUE = -150;
     private static final int MAX_BUFFER_SIZE = 1000000;
     private static byte[] streamBuffer;
     private static int bufferCounter = 1, bufferElements;
@@ -16,20 +25,49 @@ public class ImageIO {
         if (extension.equals("ppm")) {
             return SwingFXUtils.toFXImage(readPPMImage(file), null);
         }
-        return SwingFXUtils.toFXImage(javax.imageio.ImageIO.read(file), null);
+        BufferedImage image = javax.imageio.ImageIO.read(file);
+        if (image == null) {
+            throw new IOException("File is not an image or is corrupted.");
+        }
+        return SwingFXUtils.toFXImage(image, null);
+    }
+
+    public static void writeImage(File file, Image image, Map<ImageSaveParam, Object> params) throws IOException {
+        String extension = getFileExtension(file);
+        if (extension.equals("jpeg") || extension.equals("jpg")) {
+            JPEGImageWriteParam param = new JPEGImageWriteParam(null);
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality((Float) (params.get(ImageSaveParam.JPEG_COMPRESSION) != null ? params.get(ImageSaveParam.JPEG_COMPRESSION) : ImageSaveParam.JPEG_COMPRESSION.getDefaultValue()));
+
+            final ImageWriter writer = javax.imageio.ImageIO.getImageWritersByMIMEType("image/jpeg").next();
+            writer.setOutput(new FileImageOutputStream(file));
+
+            final BufferedImage rawVersion = SwingFXUtils.fromFXImage(image, null);
+
+            final int w = rawVersion.getWidth();
+            final int h = rawVersion.getHeight();
+
+            BufferedImage imageToSave = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            final Graphics2D g2 = imageToSave.createGraphics();
+            g2.setPaint(Color.WHITE);
+            g2.fillRect(0, 0, w, h);
+            g2.drawImage(rawVersion, 0, 0, null);
+            writer.write(null, new IIOImage(imageToSave, null, null), param);
+        } else {
+            throw new IOException("Unrecognized format");
+        }
     }
 
     private static BufferedImage readPPMImage(File file) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             String type = readUncommentedPart(fileInputStream);
-            int maxBytesPerPixel;
-            boolean readPlainText = false;
+            boolean readPlainText;
             if (type.equals("P3")) {
                 readPlainText = true;
             } else if (type.equals("P6")) {
                 readPlainText = false;
             } else {
-                throw new IOException("Shit happened");
+                throw new PPMException("Invalid header.");
             }
             int dimX = Integer.parseInt(readUncommentedPart(fileInputStream));
             int dimY = Integer.parseInt(readUncommentedPart(fileInputStream));
@@ -37,7 +75,7 @@ public class ImageIO {
             int maxValue = Integer.parseInt(readUncommentedPart(fileInputStream));
             int numOfBytes;
             if (maxValue >= (1 << 16)) {
-                throw new IOException("TOO BIG VALUE");
+                throw new PPMException("Value per color is too big");
             } else if (maxValue >= (1 << 8)) {
                 numOfBytes = 2;
             } else {
@@ -58,59 +96,72 @@ public class ImageIO {
             for (int x = 0; x < dto.getWidth(); x++) {
                 val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
-                    throw new IOException("TOO BIG VALUE");
+                    val = maxValue;
                 }
-                dto.getR()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+                dto.getR()[x][y] = (int) (val * 255.0 / maxValue);
                 val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
-                    throw new IOException("TOO BIG VALUE");
+                    val = maxValue;
                 }
-                dto.getG()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+                dto.getG()[x][y] = (int) (val * 255.0 / maxValue);
                 val = Integer.parseInt(readUncommentedPart(reader, true, dto.getWidth() * dto.getHeight()));
                 if (val > maxValue) {
-                    throw new IOException("TOO BIG VALUE");
+                    val = maxValue;
                 }
-                dto.getB()[x][y] = (int) (val * 255.0 / (maxValue + 1));
+                dto.getB()[x][y] = (int) (val * 255.0 / maxValue);
             }
+        }
+        String str = readUncommentedPart(reader, true, 100);
+        if (!str.isEmpty()) {
+            throw new PPMException("File is corrupted!");
         }
     }
 
     private static void readBinaryPPM(ImageDTO imageDTO, InputStream inputStream, int numOfBytes, int maxValue) throws IOException {
-        int bytesPerRead = imageDTO.getWidth() * 3 * numOfBytes;
-        byte[] buffer = new byte[bytesPerRead];
-        int x = 0, y = 0;
-        int bytesRead = 0;
-        for (int i = 0; i < imageDTO.getHeight(); i++) {
-            bytesRead = inputStream.read(buffer, 0, bytesPerRead);
-            if (bytesRead < bytesPerRead) {
-                System.out.println("poop");
-                //throw new IOException("FILE IS SHIT");
-            }
-            int val = 0;
-            for (int k = 0; k < bytesPerRead; k += 3 * numOfBytes) {
-                for (int j = 0; j < numOfBytes; j++) {
-                    val <<= 8;
-                    val += (int) (buffer[k + j] & 0xFF);
-                }
-                imageDTO.getR()[x][y] = (int) (val * 256.0 / (maxValue + 1));
+        int inVal, val;
+        for (int y = 0; y < imageDTO.getHeight(); y++) {
+            for (int x = 0; x < imageDTO.getWidth(); x++) {
                 val = 0;
                 for (int j = 0; j < numOfBytes; j++) {
                     val <<= 8;
-                    val += (int) (buffer[k + j + numOfBytes] & 0xFF);
+                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    if (inVal == READ_ERROR_VALUE) {
+                        throw new PPMException("File is corrupted!");
+                    }
                 }
-                imageDTO.getG()[x][y] = (int) (val * 256.0 / (maxValue + 1));
+                if (val > maxValue) {
+                    val = maxValue;
+                }
+                imageDTO.getR()[x][y] = (int) (val * 255.0 / maxValue);
                 val = 0;
                 for (int j = 0; j < numOfBytes; j++) {
                     val <<= 8;
-                    val += (int) (buffer[k + j + numOfBytes * 2] & 0xFF);
+                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    if (inVal == READ_ERROR_VALUE) {
+                        throw new PPMException("File is corrupted!");
+                    }
                 }
-                imageDTO.getB()[x][y] = (int) (val * 256.0 / (maxValue + 1));
-                x++;
-                if (x == imageDTO.getWidth()) {
-                    x = 0;
-                    y++;
+                if (val > maxValue) {
+                    val = maxValue;
                 }
+                imageDTO.getG()[x][y] = (int) (val * 255.0 / maxValue);
+                val = 0;
+                for (int j = 0; j < numOfBytes; j++) {
+                    val <<= 8;
+                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    if (inVal == READ_ERROR_VALUE) {
+                        throw new PPMException("File is corrupted!");
+                    }
+                }
+                if (val > maxValue) {
+                    val = maxValue;
+                }
+                imageDTO.getB()[x][y] = (int) (val * 255.0 / maxValue);
             }
+        }
+        String str = readUncommentedPart(inputStream, true, 100);
+        if (!str.isEmpty()) {
+            throw new PPMException("File is corrupted!");
         }
     }
 
@@ -131,7 +182,11 @@ public class ImageIO {
         char c;
         int i;
         boolean isComment = false;
-        while (Character.isWhitespace(c = (char) (i = read(inputStream, buffering, bufferSize)))) ;
+        while (Character.isWhitespace(c = (char) (i = read(inputStream, buffering, bufferSize))) && i != READ_ERROR_VALUE)
+            ;
+        if (i == READ_ERROR_VALUE) {
+            return "";
+        }
         while (true) {
             if (c == '#') {
                 isComment = true;
@@ -155,7 +210,7 @@ public class ImageIO {
             }
 
             c = (char) (i = read(inputStream, buffering, bufferSize));
-            if (i == -1) {
+            if (i == READ_ERROR_VALUE) {
                 return sb.toString();
             }
         }
@@ -171,10 +226,13 @@ public class ImageIO {
     private static int readBuffered(InputStream inputStream, int bufferSize) throws IOException {
         bufferSize = Math.min(bufferSize, MAX_BUFFER_SIZE);
         if (bufferCounter >= bufferElements) {
-            if (streamBuffer == null || streamBuffer.length != bufferSize) {
+            if (streamBuffer == null || streamBuffer.length < bufferSize) {
                 streamBuffer = new byte[bufferSize];
             }
             bufferElements = inputStream.read(streamBuffer, 0, bufferSize);
+            if (bufferElements == -1) {
+                return READ_ERROR_VALUE;
+            }
             bufferCounter = 0;
         }
         return streamBuffer[bufferCounter++];

@@ -1,8 +1,10 @@
 package pl.yalgrin.gremphics.controller;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class CanvasHolder extends Pane {
     private Canvas canvas;
@@ -19,8 +21,13 @@ public class CanvasHolder extends Pane {
 
     public void setImage(Image image) {
         this.image = image;
-        canvas = new Canvas(image.getWidth(), image.getHeight());
-        canvas.getGraphicsContext2D().drawImage(image, 0, 0);
+        canvas = new Canvas(image.getWidth() + 4, image.getHeight() + 4);
+        GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
+        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.fillRect(0, 0, image.getWidth() + 4, image.getHeight() + 4);
+        graphicsContext.setFill(Color.BLACK);
+        graphicsContext.fillRect(1, 1, image.getWidth() + 2, image.getHeight() + 2);
+        graphicsContext.drawImage(image, 2, 2);
         getChildren().addAll(canvas);
 
 
