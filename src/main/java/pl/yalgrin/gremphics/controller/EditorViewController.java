@@ -28,6 +28,12 @@ public class EditorViewController extends AbstractController {
         super.initialize(location, resources);
 
         canvasHolder = new CanvasHolder();
+
+        AnchorPane.setBottomAnchor(canvasHolder, 0.0);
+        AnchorPane.setTopAnchor(canvasHolder, 0.0);
+        AnchorPane.setLeftAnchor(canvasHolder, 0.0);
+        AnchorPane.setRightAnchor(canvasHolder, 0.0);
+
         centerPane.getChildren().add(canvasHolder);
     }
 
