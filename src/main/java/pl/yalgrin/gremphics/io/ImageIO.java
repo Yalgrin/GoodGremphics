@@ -21,6 +21,7 @@ public class ImageIO {
     private static int bufferCounter = 1, bufferElements;
 
     public static Image readImage(File file) throws IOException {
+        bufferElements = bufferCounter = 1;
         String extension = getFileExtension(file);
         if (extension.equals("ppm")) {
             return SwingFXUtils.toFXImage(readPPMImage(file), null);

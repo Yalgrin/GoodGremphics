@@ -1,5 +1,6 @@
 package pl.yalgrin.gremphics.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -156,5 +157,26 @@ public class MainWindowController extends AbstractController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void exitApplication(ActionEvent actionEvent) {
+    }
+
+    public void goToShapeView(ActionEvent actionEvent) throws IOException {
+        loadContentPane("layout/shapes_view.fxml", controllerData, null);
+    }
+
+    public void goToEditorView(ActionEvent actionEvent) {
+
+    }
+
+    public void goToRgbCmykConv(ActionEvent actionEvent) {
+    }
+
+    public void goToRgbCube(ActionEvent actionEvent) throws IOException {
+        openWindow("RGB Cube", "layout/rgb_cube_view.fxml");
+    }
+
+    public void goToHsvCone(ActionEvent actionEvent) {
     }
 }
