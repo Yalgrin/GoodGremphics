@@ -14,8 +14,12 @@ import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
+import pl.yalgrin.gremphics.io.ImageIO;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class RgbViewController extends AbstractController {
@@ -25,14 +29,14 @@ public class RgbViewController extends AbstractController {
         //https://stackoverflow.com/questions/19459012/how-to-create-custom-3d-model-in-javafx-8
         public Shape3DRectangle(float length) {
             float[] points = {
-                    -length / 2, -length / 2, length / 2, // P0 - left up front
-                    length / 2, -length / 2, length / 2, // P1 - right up front
-                    -length / 2, length / 2, length / 2, // P2 - left down front
-                    length / 2, length / 2, length / 2, // P3 - right down front
-                    -length / 2, -length / 2, -length / 2, // P4 - left up back
-                    length / 2, -length / 2, -length / 2, // P5 - right up back
-                    -length / 2, length / 2, -length / 2, // P6 - left down back
-                    length / 2, length / 2, -length / 2, // P7 - right down back
+                    -length / 2, -length / 2, -length / 2, // P0 - left up front
+                    length / 2, -length / 2, -length / 2, // P1 - right up front
+                    -length / 2, length / 2, -length / 2, // P2 - left down front
+                    length / 2, length / 2, -length / 2, // P3 - right down front
+                    -length / 2, -length / 2, length / 2, // P4 - left up back
+                    length / 2, -length / 2, length / 2, // P5 - right up back
+                    -length / 2, length / 2, length / 2, // P6 - left down back
+                    length / 2, length / 2, length / 2, // P7 - right down back
             };
             float[] texCoords = {
                     0.25f, 0, //T0
@@ -62,7 +66,9 @@ public class RgbViewController extends AbstractController {
                     4, 6, 5, 5, 7, 10,
                     4, 6, 7, 10, 6, 11,
                     3, 9, 2, 8, 6, 12,
-                    3, 9, 6, 12, 7, 13
+                    3, 9, 6, 12, 7, 13,
+                    4, 0, 4, 0, 0, 3,
+                    4, 0, 4, 0, 0, 3,
             };
 
             getPoints().setAll(points);
@@ -77,6 +83,9 @@ public class RgbViewController extends AbstractController {
     private WritableImage texture;
 
     private double lastX, lastY;
+    private Rotate rotateX, rotateY;
+
+    private double anchorX, anchorY, anchorXAngle, anchorYAngle;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -84,10 +93,48 @@ public class RgbViewController extends AbstractController {
 
         texture = new WritableImage(1024, 1024);
         PixelWriter pixelWriter = texture.getPixelWriter();
-        for (int x = 0; x < 1024; x++) {
-            for (int y = 0; y < 1024; y++) {
-                pixelWriter.setColor(x, y, Color.color(Math.random(), Math.random(), Math.random()));
+//        for (int x = 0; x < 1024; x++) {
+//            for (int y = 0; y < 1024; y++) {
+//                pixelWriter.setColor(x, y, Color.color(Math.random(), Math.random(), Math.random()));
+//            }
+//        }
+
+        for (int x = 256; x < 512; x++) {
+            for (int y = 256; y < 512; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(511 - y, x - 256, 0));
             }
+        }
+        for (int x = 0; x < 256; x++) {
+            for (int y = 256; y < 512; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(511 - y, 0, 255 - x));
+            }
+        }
+        for (int x = 256; x < 512; x++) {
+            for (int y = 0; y < 256; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(255, x - 256, 255 - y));
+            }
+        }
+        for (int x = 256; x < 512; x++) {
+            for (int y = 512; y < 768; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(0, x - 256, y - 512));
+            }
+        }
+        for (int x = 512; x < 768; x++) {
+            for (int y = 256; y < 512; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(511 - y, 255, x - 512));
+            }
+        }
+        for (int x = 768; x < 1024; x++) {
+            for (int y = 256; y < 512; y++) {
+                pixelWriter.setColor(x, y, Color.rgb(511 - y, 1023 - x, 255));
+            }
+        }
+
+
+        try {
+            ImageIO.writeImage(new File("D:/tesciki.jpg"), texture, new HashMap<>());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         PhongMaterial material = new PhongMaterial();
@@ -98,10 +145,13 @@ public class RgbViewController extends AbstractController {
         );
         rect.setMaterial(material);
         rect.setDrawMode(DrawMode.FILL);
-        rect.setRotationAxis(Rotate.Y_AXIS);
         rect.setTranslateX(250);
         rect.setTranslateY(250);
-        rect.setCullFace(CullFace.NONE);
+        rect.setCullFace(CullFace.BACK);
+
+        rotateX = new Rotate(0, Rotate.X_AXIS);
+        rotateY = new Rotate(0, Rotate.Y_AXIS);
+        rect.getTransforms().addAll(rotateX, rotateY);
 
         final Group root = new Group(rect);
         root.getChildren().add(new AmbientLight());
@@ -111,13 +161,15 @@ public class RgbViewController extends AbstractController {
             @Override public void handle(MouseEvent event) {
                 anchorX = event.getSceneX();
                 anchorY = event.getSceneY();
-                anchorAngle = rect.getRotate();
+                anchorXAngle = rotateX.getAngle();
+                anchorYAngle = rotateY.getAngle();
             }
         });
 
         anchorPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent event) {
-                rect.setRotate(anchorAngle + anchorX - event.getSceneX());
+                rotateX.setAngle(anchorXAngle - (anchorY - event.getSceneY()));
+                rotateY.setAngle(anchorYAngle + anchorX - event.getSceneX());
             }
         });
 
@@ -127,10 +179,8 @@ public class RgbViewController extends AbstractController {
         anchorPane.getChildren().add(scene);
     }
 
-    double anchorX, anchorY, anchorAngle;
-
     private PerspectiveCamera addCamera(SubScene scene) {
-        PerspectiveCamera perspectiveCamera = new PerspectiveCamera(false);
+        PerspectiveCamera perspectiveCamera = new PerspectiveCamera();
         scene.setCamera(perspectiveCamera);
         return perspectiveCamera;
     }

@@ -60,6 +60,7 @@ public class ImageIO {
     }
 
     private static BufferedImage readPPMImage(File file) throws IOException {
+        long timeInMillis = System.currentTimeMillis();
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             String type = readUncommentedPart(fileInputStream);
             boolean readPlainText;
@@ -87,6 +88,7 @@ public class ImageIO {
             } else {
                 readBinaryPPM(imageDTO, fileInputStream, numOfBytes, maxValue);
             }
+            System.out.println("Wczytano w: " + (System.currentTimeMillis() - timeInMillis));
             return imageDTOToBufImage(imageDTO);
         }
     }
@@ -112,10 +114,10 @@ public class ImageIO {
                 dto.getB()[x][y] = (int) (val * 255.0 / maxValue);
             }
         }
-        String str = readUncommentedPart(reader, true, 100);
-        if (!str.isEmpty()) {
-            throw new PPMException("File is corrupted!");
-        }
+//        String str = readUncommentedPart(reader, true, 100);
+//        if (!str.isEmpty()) {
+//            throw new PPMException("File is corrupted!");
+//        }
     }
 
     private static void readBinaryPPM(ImageDTO imageDTO, InputStream inputStream, int numOfBytes, int maxValue) throws IOException {
@@ -160,10 +162,10 @@ public class ImageIO {
                 imageDTO.getB()[x][y] = (int) (val * 255.0 / maxValue);
             }
         }
-        String str = readUncommentedPart(inputStream, true, 100);
-        if (!str.isEmpty()) {
-            throw new PPMException("File is corrupted!");
-        }
+//        String str = readUncommentedPart(inputStream, true, 100);
+//        if (!str.isEmpty()) {
+//            throw new PPMException("File is corrupted!");
+//        }
     }
 
     private static String readLineWithoutComments(BufferedReader reader) throws IOException {
