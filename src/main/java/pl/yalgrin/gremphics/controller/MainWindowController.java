@@ -171,6 +171,7 @@ public class MainWindowController extends AbstractController {
     }
 
     public void goToRgbCmykConv(ActionEvent actionEvent) {
+        openWindow("RGB/CMYK Converter", "layout/rgb_cmyk_view.fxml");
     }
 
     public void goToRgbCube(ActionEvent actionEvent) throws IOException {
