@@ -179,5 +179,6 @@ public class MainWindowController extends AbstractController {
     }
 
     public void goToHsvCone(ActionEvent actionEvent) {
+        openWindow("HSV Cone", "layout/hsv_cone_view.fxml");
     }
 }
