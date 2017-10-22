@@ -20,7 +20,6 @@
                         <Menu mnemonicParsing="false" text="View">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#goToShapeView" text="Shape view"/>
-                                <MenuItem mnemonicParsing="false" onAction="#goToEditorView" text="Editor view"/>
                                 <MenuItem mnemonicParsing="false" onAction="#goToRgbCmykConv"
                                           text="RGB/CMYK conversion"/>
                                 <MenuItem mnemonicParsing="false" onAction="#goToRgbCube" text="RGB cube"/>

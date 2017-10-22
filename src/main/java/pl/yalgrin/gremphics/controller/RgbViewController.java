@@ -1,11 +1,9 @@
 package pl.yalgrin.gremphics.controller;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.*;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -59,20 +57,16 @@ public class RgbViewController extends AbstractController {
         root.getChildren().add(new AmbientLight());
         final SubScene scene = new SubScene(root, 500, 500, true, SceneAntialiasing.BALANCED);
 
-        anchorPane.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent event) {
-                anchorX = event.getSceneX();
-                anchorY = event.getSceneY();
-                anchorXAngle = rotateX.getAngle();
-                anchorYAngle = rotateY.getAngle();
-            }
+        anchorPane.setOnMousePressed(event -> {
+            anchorX = event.getSceneX();
+            anchorY = event.getSceneY();
+            anchorXAngle = rotateX.getAngle();
+            anchorYAngle = rotateY.getAngle();
         });
 
-        anchorPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent event) {
-                rotateX.setAngle(anchorXAngle - (anchorY - event.getSceneY()));
-                rotateY.setAngle(anchorYAngle + anchorX - event.getSceneX());
-            }
+        anchorPane.setOnMouseDragged(event -> {
+            rotateX.setAngle(anchorXAngle - (anchorY - event.getSceneY()));
+            rotateY.setAngle(anchorYAngle + anchorX - event.getSceneX());
         });
 
 

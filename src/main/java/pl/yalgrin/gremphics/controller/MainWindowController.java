@@ -166,10 +166,6 @@ public class MainWindowController extends AbstractController {
         loadContentPane("layout/shapes_view.fxml", controllerData, null);
     }
 
-    public void goToEditorView(ActionEvent actionEvent) {
-
-    }
-
     public void goToRgbCmykConv(ActionEvent actionEvent) {
         openWindow("RGB/CMYK Converter", "layout/rgb_cmyk_view.fxml");
     }
