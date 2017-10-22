@@ -1,4 +1,4 @@
-package pl.yalgrin.gremphics.shape;
+package pl.yalgrin.gremphics.threedee;
 
 
 import javafx.scene.shape.TriangleMesh;

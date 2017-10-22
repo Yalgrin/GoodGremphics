@@ -15,7 +15,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import pl.yalgrin.gremphics.io.ImageIO;
 import pl.yalgrin.gremphics.io.ImageSaveParam;
-import pl.yalgrin.gremphics.shape.ShapeCube;
+import pl.yalgrin.gremphics.threedee.ShapeCube;
 
 import java.io.File;
 import java.io.IOException;
