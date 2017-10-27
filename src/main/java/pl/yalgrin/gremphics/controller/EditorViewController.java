@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import pl.yalgrin.gremphics.control.CanvasHolder;
 
 import java.net.URL;
 import java.util.ResourceBundle;

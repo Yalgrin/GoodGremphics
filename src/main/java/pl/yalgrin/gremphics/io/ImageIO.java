@@ -2,6 +2,7 @@ package pl.yalgrin.gremphics.io;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import pl.yalgrin.gremphics.exception.PPMException;
 
 import javax.imageio.IIOImage;
@@ -20,7 +21,7 @@ public class ImageIO {
     private static byte[] streamBuffer;
     private static int bufferCounter = 1, bufferElements;
 
-    public static Image readImage(File file) throws IOException {
+    public static WritableImage readImage(File file) throws IOException {
         bufferElements = bufferCounter = 1;
         String extension = getFileExtension(file);
         if (extension.equals("ppm")) {
@@ -64,12 +65,15 @@ public class ImageIO {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             String type = readUncommentedPart(fileInputStream);
             boolean readPlainText;
-            if (type.equals("P3")) {
-                readPlainText = true;
-            } else if (type.equals("P6")) {
-                readPlainText = false;
-            } else {
-                throw new PPMException("Invalid header.");
+            switch (type) {
+                case "P3":
+                    readPlainText = true;
+                    break;
+                case "P6":
+                    readPlainText = false;
+                    break;
+                default:
+                    throw new PPMException("Invalid header.");
             }
             int dimX = Integer.parseInt(readUncommentedPart(fileInputStream));
             int dimY = Integer.parseInt(readUncommentedPart(fileInputStream));
@@ -127,7 +131,7 @@ public class ImageIO {
                 val = 0;
                 for (int j = 0; j < numOfBytes; j++) {
                     val <<= 8;
-                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    val += (inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF;
                     if (inVal == READ_ERROR_VALUE) {
                         throw new PPMException("File is corrupted!");
                     }
@@ -139,7 +143,7 @@ public class ImageIO {
                 val = 0;
                 for (int j = 0; j < numOfBytes; j++) {
                     val <<= 8;
-                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    val += (inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF;
                     if (inVal == READ_ERROR_VALUE) {
                         throw new PPMException("File is corrupted!");
                     }
@@ -151,7 +155,7 @@ public class ImageIO {
                 val = 0;
                 for (int j = 0; j < numOfBytes; j++) {
                     val <<= 8;
-                    val += (int) ((inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF);
+                    val += (inVal = read(inputStream, true, imageDTO.getWidth() * imageDTO.getHeight() * numOfBytes)) & 0xFF;
                     if (inVal == READ_ERROR_VALUE) {
                         throw new PPMException("File is corrupted!");
                     }
@@ -176,17 +180,19 @@ public class ImageIO {
         return line;
     }
 
-    public static String readUncommentedPart(InputStream inputStream) throws IOException {
+    private static String readUncommentedPart(InputStream inputStream) throws IOException {
         return readUncommentedPart(inputStream, false, 0);
     }
 
-    public static String readUncommentedPart(InputStream inputStream, boolean buffering, int bufferSize) throws IOException {
+    private static String readUncommentedPart(InputStream inputStream, boolean buffering, int bufferSize) throws IOException {
         StringBuilder sb = new StringBuilder();
         char c;
         int i;
         boolean isComment = false;
-        while (Character.isWhitespace(c = (char) (i = read(inputStream, buffering, bufferSize))) && i != READ_ERROR_VALUE)
-            ;
+        while (true) {
+            if (!(Character.isWhitespace(c = (char) (i = read(inputStream, buffering, bufferSize))) && i != READ_ERROR_VALUE))
+                break;
+        }
         if (i == READ_ERROR_VALUE) {
             return "";
         }

@@ -17,6 +17,12 @@
                                 <MenuItem mnemonicParsing="false" onAction="#exitApplication" text="Close"/>
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Edit">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#goToPointOperations"
+                                          text="Point operations"/>
+                            </items>
+                        </Menu>
                         <Menu mnemonicParsing="false" text="View">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#goToShapeView" text="Shape view"/>

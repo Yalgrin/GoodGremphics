@@ -34,6 +34,8 @@ public class MainWindowController extends AbstractController {
     private AbstractController currentViewController;
     private AbstractController currentWindowController;
 
+    private EditorViewController editorViewController;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
@@ -44,7 +46,7 @@ public class MainWindowController extends AbstractController {
         }
     }
 
-    public void loadContentPane(String layourUrl) throws IOException {
+    private void loadContentPane(String layourUrl) throws IOException {
         loadContentPane(layourUrl, this.controllerData, null);
     }
 
@@ -52,16 +54,17 @@ public class MainWindowController extends AbstractController {
         loadContentPane(layourUrl, controllerData, null);
     }
 
-    public void loadContentPane(String layourUrl, PreViewChange runnable) throws IOException {
+    private void loadContentPane(String layourUrl, PreViewChange runnable) throws IOException {
         loadContentPane(layourUrl, this.controllerData, runnable);
     }
 
-    public void loadContentPane(String layoutUrl, ControllerData<Object> controllerData, PreViewChange runnable) throws IOException {
+    private void loadContentPane(String layoutUrl, ControllerData<Object> controllerData, PreViewChange runnable) throws IOException {
         if (currentViewController != null) {
             currentViewController.onWindowClose();
             currentViewController = null;
         }
 
+        editorViewController = null;
         FXMLLoader loader = new FXMLLoader(MainWindowController.class.getClassLoader().getResource(layoutUrl));
         loader.setResources(ResourceBundle.getBundle("language.LangBundle", Locale.ENGLISH));
         Parent root = loader.load();
@@ -91,6 +94,7 @@ public class MainWindowController extends AbstractController {
                 loadContentPane("layout/editor_view.fxml", c -> {
                     EditorViewController controller = (EditorViewController) c;
                     controller.setImage(image);
+                    editorViewController = controller;
                 });
             } catch (IOException ex) {
                 final StringWriter sw = new StringWriter();
@@ -141,7 +145,7 @@ public class MainWindowController extends AbstractController {
         }
     }
 
-    public void openWindow(String title, String layoutUrl) {
+    private void openWindow(String title, String layoutUrl) {
         try {
             FXMLLoader loader = new FXMLLoader(MainWindowController.class.getClassLoader().getResource(layoutUrl));
             loader.setResources(ResourceBundle.getBundle("language.LangBundle", Locale.ENGLISH));
@@ -176,5 +180,21 @@ public class MainWindowController extends AbstractController {
 
     public void goToHsvCone(ActionEvent actionEvent) {
         openWindow("HSV Cone", "layout/hsv_cone_view.fxml");
+    }
+
+    public void goToPointOperations(ActionEvent actionEvent) {
+        if (controllerData.getParameter(EditorViewController.PARAM_IMAGE) == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error during processing occured!");
+            alert.setContentText("No image loaded!");
+            alert.showAndWait();
+            return;
+        }
+
+        openWindow("Point operations", "layout/point_operation_view.fxml");
+    }
+
+    public EditorViewController getEditorViewController() {
+        return editorViewController;
     }
 }

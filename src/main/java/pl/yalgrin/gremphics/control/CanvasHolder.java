@@ -1,4 +1,4 @@
-package pl.yalgrin.gremphics.controller;
+package pl.yalgrin.gremphics.control;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,7 +12,7 @@ public class CanvasHolder extends Pane {
     private boolean isDragging = false;
     private double lastX, lastY;
     private double curShiftX, curShiftY;
-    private double curScale = 1;
+    private double curScale = 1, lastTranslateX = 0, lastTranslateY = 0;
 
     public CanvasHolder() {
 
@@ -33,6 +33,8 @@ public class CanvasHolder extends Pane {
             curShiftX -= lastX - e.getX();
             curShiftY -= lastY - e.getY();
             canvas.relocate(curShiftX, curShiftY);
+            lastTranslateX = canvas.getLayoutX();
+            lastTranslateY = canvas.getLayoutY();
             lastX = e.getX();
             lastY = e.getY();
         });
@@ -43,14 +45,17 @@ public class CanvasHolder extends Pane {
             lastY = e.getY();
         });
 
-        setOnMouseReleased(e -> {
-            isDragging = false;
-        });
+        setOnMouseReleased(e -> isDragging = false);
 
         setOnScroll(e -> {
             curScale *= Math.pow(1.05, e.getDeltaY() / 40.0);
             canvas.setScaleX(curScale);
             canvas.setScaleY(curScale);
         });
+
+        canvas.setLayoutX(lastTranslateX);
+        canvas.setLayoutY(lastTranslateY);
+        canvas.setScaleX(curScale);
+        canvas.setScaleY(curScale);
     }
 }
