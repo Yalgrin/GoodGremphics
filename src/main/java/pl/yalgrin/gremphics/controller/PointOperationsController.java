@@ -1,6 +1,5 @@
 package pl.yalgrin.gremphics.controller;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -221,10 +220,6 @@ public class PointOperationsController extends AbstractController {
             alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
             alert.showAndWait();
         }
-    }
-
-    private void updateUI(WritableImage image) {
-        Platform.runLater(() -> getMainWindowController().getEditorViewController().setImage(image));
     }
 
     @FXML

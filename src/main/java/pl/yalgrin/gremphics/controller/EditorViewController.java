@@ -1,7 +1,7 @@
 package pl.yalgrin.gremphics.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import pl.yalgrin.gremphics.control.CanvasHolder;
@@ -24,6 +24,8 @@ public class EditorViewController extends AbstractController {
 
     private CanvasHolder canvasHolder;
 
+    private WritableImage image;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
@@ -38,8 +40,15 @@ public class EditorViewController extends AbstractController {
         centerPane.getChildren().add(canvasHolder);
     }
 
-    public void setImage(Image image) {
+    public void setImage(WritableImage image) {
+        this.image = image;
+
         canvasHolder.setImage(image);
         controllerData.setParameter(PARAM_IMAGE, image);
+    }
+
+    @Override
+    public WritableImage getImage() {
+        return image;
     }
 }

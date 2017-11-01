@@ -32,6 +32,16 @@
                                 <MenuItem mnemonicParsing="false" onAction="#goToHsvCone" text="HSV cone"/>
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Histogram">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#goToHistogram"
+                                          text="View histogram"/>
+                                <MenuItem mnemonicParsing="false" onAction="#stretchHistogram"
+                                          text="Stretch histogram"/>
+                                <MenuItem mnemonicParsing="false" onAction="#equalizeHistogram"
+                                          text="Equalize histogram"/>
+                            </items>
+                        </Menu>
                     </menus>
                 </MenuBar>
             </top>

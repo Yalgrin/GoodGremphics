@@ -9,11 +9,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.yalgrin.gremphics.io.ImageIO;
 import pl.yalgrin.gremphics.io.ImageSaveParam;
+import pl.yalgrin.gremphics.processing.HistogramProcessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,7 @@ public class MainWindowController extends AbstractController {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
+        setMainWindowController(this);
         try {
             loadContentPane("layout/shapes_view.fxml");
         } catch (IOException e) {
@@ -90,7 +93,7 @@ public class MainWindowController extends AbstractController {
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             try {
-                Image image = ImageIO.readImage(file);
+                WritableImage image = ImageIO.readImage(file);
                 loadContentPane("layout/editor_view.fxml", c -> {
                     EditorViewController controller = (EditorViewController) c;
                     controller.setImage(image);
@@ -145,7 +148,7 @@ public class MainWindowController extends AbstractController {
         }
     }
 
-    private void openWindow(String title, String layoutUrl) {
+    private void openWindow(String title, String layoutUrl, PreViewChange runnable) {
         try {
             FXMLLoader loader = new FXMLLoader(MainWindowController.class.getClassLoader().getResource(layoutUrl));
             loader.setResources(ResourceBundle.getBundle("language.LangBundle", Locale.ENGLISH));
@@ -153,6 +156,9 @@ public class MainWindowController extends AbstractController {
             currentWindowController = loader.getController();
             currentWindowController.setMainWindowController(this);
             currentWindowController.initData(controllerData);
+            if (runnable != null) {
+                runnable.onViewChange(currentWindowController);
+            }
             currentWindowController.initializeAfterLoad();
             Stage stage = new Stage();
             stage.setTitle(title);
@@ -161,6 +167,10 @@ public class MainWindowController extends AbstractController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void openWindow(String title, String layoutUrl) {
+        openWindow(title, layoutUrl, null);
     }
 
     public void exitApplication(ActionEvent actionEvent) {
@@ -196,5 +206,20 @@ public class MainWindowController extends AbstractController {
 
     public EditorViewController getEditorViewController() {
         return editorViewController;
+    }
+
+    public void goToHistogram(ActionEvent actionEvent) {
+        openWindow("Histogram", "layout/histogram_view.fxml", controller -> {
+            HistogramController c = (HistogramController) controller;
+            c.setImage(currentViewController.getImage());
+        });
+    }
+
+    public void stretchHistogram(ActionEvent actionEvent) {
+        updateUI(HistogramProcessor.getInstance().stretchImageHistogram(currentViewController.getImage()));
+    }
+
+    public void equalizeHistogram(ActionEvent actionEvent) {
+        updateUI(HistogramProcessor.getInstance().equalizeHistogram(currentViewController.getImage()));
     }
 }

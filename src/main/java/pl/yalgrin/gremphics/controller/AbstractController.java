@@ -1,6 +1,8 @@
 package pl.yalgrin.gremphics.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.Initializable;
+import javafx.scene.image.WritableImage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -35,5 +37,13 @@ public abstract class AbstractController implements Initializable {
 
     public void onWindowClose() {
 
+    }
+
+    public WritableImage getImage() {
+        return null;
+    }
+
+    protected void updateUI(WritableImage image) {
+        Platform.runLater(() -> getMainWindowController().getEditorViewController().setImage(image));
     }
 }

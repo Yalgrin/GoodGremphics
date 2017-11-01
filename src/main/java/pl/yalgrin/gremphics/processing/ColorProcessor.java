@@ -41,10 +41,10 @@ public class ColorProcessor {
         return instance;
     }
 
-    private ColorProcessor() {
+    protected ColorProcessor() {
     }
 
-    private WritableImage lutOperation(WritableImage image, byte[][] lutArray) {
+    protected WritableImage lutOperation(WritableImage image, byte[][] lutArray) {
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
         byte[] buffer = new byte[width * height * 4];
@@ -59,10 +59,11 @@ public class ColorProcessor {
             buffer[i + r] = lutArray[r][buffer[i + r] & 0xFF];
         }
 
-        PixelWriter pixelWriter = image.getPixelWriter();
+        WritableImage newImage = new WritableImage(width, height);
+        PixelWriter pixelWriter = newImage.getPixelWriter();
         pixelWriter.setPixels(0, 0, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
 
-        return image;
+        return newImage;
     }
 
     private WritableImage sumLutOperation(WritableImage image, byte[] lut) {
@@ -80,10 +81,11 @@ public class ColorProcessor {
             buffer[i + b] = buffer[i + g] = buffer[i + r] = lut[sum];
         }
 
-        PixelWriter pixelWriter = image.getPixelWriter();
+        WritableImage newImage = new WritableImage(width, height);
+        PixelWriter pixelWriter = newImage.getPixelWriter();
         pixelWriter.setPixels(0, 0, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
 
-        return image;
+        return newImage;
     }
 
     public WritableImage pointOperation(WritableImage image, PointOperation pointOperation, double red, double green, double blue) {
