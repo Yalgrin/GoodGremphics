@@ -3,18 +3,19 @@ package pl.yalgrin.gremphics.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.yalgrin.gremphics.io.ImageIO;
 import pl.yalgrin.gremphics.io.ImageSaveParam;
+import pl.yalgrin.gremphics.processing.BinarizationProcessor;
 import pl.yalgrin.gremphics.processing.HistogramProcessor;
 
 import java.io.File;
@@ -24,6 +25,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainWindowController extends AbstractController {
@@ -221,5 +223,32 @@ public class MainWindowController extends AbstractController {
 
     public void equalizeHistogram(ActionEvent actionEvent) {
         updateUI(HistogramProcessor.getInstance().equalizeHistogram(currentViewController.getImage()));
+    }
+
+    public void manualBinarization(ActionEvent actionEvent) {
+        Dialog<Integer> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Select threshold");
+        dialog.setHeaderText("Select threshold for binarization");
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+        Label label = new Label("Threshold");
+        Spinner<Integer> spinner = new Spinner<>(0, 255, 127, 1);
+        spinner.setEditable(true);
+        grid.add(label, 0, 0);
+        grid.add(spinner, 1, 0);
+        dialog.getDialogPane().setContent(grid);
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK) {
+                return spinner.getValue();
+            }
+            return null;
+        });
+        Optional<Integer> result = dialog.showAndWait();
+        result.ifPresent(v -> {
+            updateUI(BinarizationProcessor.getInstance().binarize(currentViewController.getImage(), v));
+        });
     }
 }

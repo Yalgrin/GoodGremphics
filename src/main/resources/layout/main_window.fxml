@@ -42,6 +42,14 @@
                                           text="Equalize histogram"/>
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Binarization">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#manualBinarization"
+                                          text="Manual"/>
+                                <MenuItem mnemonicParsing="false"
+                                          text="Other shite"/>
+                            </items>
+                        </Menu>
                     </menus>
                 </MenuBar>
             </top>
