@@ -22,7 +22,7 @@ public class BinarizationProcessor extends ColorProcessor {
             lut[i] = (byte) 255;
         }
 
-        return lutOperation(image, new byte[][]{lut, lut, lut});
+        return lutOperation(image, lut);
     }
 
     public WritableImage percentBlackSelection(WritableImage image, double percentage) {

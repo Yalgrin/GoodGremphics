@@ -67,7 +67,7 @@ public class HistogramProcessor extends ColorProcessor {
                 lut[i] = (byte) ((255.0 / (max - min)) * (i - min));
             }
         }
-        return lutOperation(image, new byte[][]{lut, lut, lut});
+        return lutOperation(image, lut);
     }
 
     public WritableImage equalizeHistogram(WritableImage image) {
@@ -88,6 +88,6 @@ public class HistogramProcessor extends ColorProcessor {
             lut[i] = (byte) ((int) (((double) cumulativeDistribution[i] - minCDstr) / ((double) pixels - minCDstr) * 255.0));
         }
 
-        return lutOperation(image, new byte[][]{lut, lut, lut});
+        return lutOperation(image, lut);
     }
 }

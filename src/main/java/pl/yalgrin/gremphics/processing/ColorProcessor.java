@@ -66,6 +66,10 @@ public class ColorProcessor {
         return newImage;
     }
 
+    protected WritableImage lutOperation(WritableImage image, byte[] lut) {
+        return lutOperation(image, new byte[][]{lut, lut, lut});
+    }
+
     private WritableImage sumLutOperation(WritableImage image, byte[] lut) {
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
