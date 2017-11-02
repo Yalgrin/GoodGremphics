@@ -24,4 +24,22 @@ public class BinarizationProcessor extends ColorProcessor {
 
         return lutOperation(image, new byte[][]{lut, lut, lut});
     }
+
+    public WritableImage percentBlackSelection(WritableImage image, double percentage) {
+        image = turnToGreyscale(image);
+        Histogram histogram = HistogramProcessor.getInstance().getHistogram(image);
+
+        int desired = (int) (percentage * (image.getWidth() * image.getHeight()));
+        int threshold = 0;
+        for (int i = 0; i < histogram.getCumulativeDistribution().length; i++) {
+            if (histogram.getCumulativeDistribution()[i] >= desired) {
+                threshold = i;
+                break;
+            }
+        }
+
+        System.out.println("Found threshold: " + threshold);
+
+        return binarize(image, threshold);
+    }
 }

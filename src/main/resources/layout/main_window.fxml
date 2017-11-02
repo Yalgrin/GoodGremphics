@@ -46,8 +46,8 @@
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#manualBinarization"
                                           text="Manual"/>
-                                <MenuItem mnemonicParsing="false"
-                                          text="Other shite"/>
+                                <MenuItem mnemonicParsing="false" onAction="#percentBlackBinarization"
+                                          text="Percent black selection"/>
                             </items>
                         </Menu>
                     </menus>
