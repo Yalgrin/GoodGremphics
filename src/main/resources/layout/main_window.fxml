@@ -50,6 +50,8 @@
                                           text="Percent black selection"/>
                                 <MenuItem mnemonicParsing="false" onAction="#meanIterativeSelection"
                                           text="Mean iterative selection"/>
+                                <MenuItem mnemonicParsing="false" onAction="#entropySelection"
+                                          text="Entropy selection"/>
                             </items>
                         </Menu>
                     </menus>

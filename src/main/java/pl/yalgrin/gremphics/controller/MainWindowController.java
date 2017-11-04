@@ -275,4 +275,8 @@ public class MainWindowController extends AbstractController {
     public void meanIterativeSelection(ActionEvent actionEvent) {
         updateUI(BinarizationProcessor.getInstance().meanIterativeSelection(currentViewController.getImage()));
     }
+
+    public void entropySelection(ActionEvent actionEvent) {
+        updateUI(BinarizationProcessor.getInstance().entropySelection(currentViewController.getImage()));
+    }
 }

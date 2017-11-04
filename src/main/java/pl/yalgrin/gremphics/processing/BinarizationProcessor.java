@@ -79,4 +79,53 @@ public class BinarizationProcessor extends ColorProcessor {
 
         return binarize(image, newThreshold);
     }
+
+    //http://computervision.wikia.com/wiki/Entropy_thresholding
+    public WritableImage entropySelection(WritableImage image) {
+        image = turnToGreyscale(image);
+        Histogram histogram = HistogramProcessor.getInstance().getHistogram(image);
+
+        int[] hist = histogram.getHistogram();
+        double[] prob = new double[256];
+        double[] entropy = new double[256];
+
+        for (int i = 0; i < hist.length; i++) {
+            prob[i] = hist[i] / (image.getWidth() * image.getHeight());
+        }
+
+        double sumProbBlack, sumProbWhite, sumProbBlackLog, sumProbWhiteLog;
+        for (int t = 0; t < 256; t++) {
+            sumProbBlack = sumProbWhite = sumProbBlackLog = sumProbWhiteLog = 0;
+
+            for (int i = 0; i < t; i++) {
+                sumProbBlack += prob[i];
+                if (prob[i] != 0) {
+                    sumProbBlackLog += (prob[i] * Math.log(prob[i]));
+                }
+            }
+
+            for (int i = t; i < 256; i++) {
+                sumProbWhite += prob[i];
+                if (prob[i] != 0) {
+                    sumProbWhiteLog += (prob[i] * Math.log(prob[i]));
+                }
+            }
+
+            entropy[t] = Math.log(sumProbBlack) + Math.log(sumProbWhite) - (sumProbBlackLog / sumProbBlack) - (sumProbWhiteLog / sumProbWhite);
+            if (Double.isNaN(entropy[t]) || entropy[t] < 0) {
+                entropy[t] = 0;
+            }
+        }
+
+        int threshold = 0;
+        for (int t = 0; t < 256; t++) {
+            if (entropy[t] > entropy[threshold]) {
+                threshold = t;
+            }
+        }
+
+        System.out.println("Found threshold: " + threshold);
+
+        return binarize(image, threshold);
+    }
 }
