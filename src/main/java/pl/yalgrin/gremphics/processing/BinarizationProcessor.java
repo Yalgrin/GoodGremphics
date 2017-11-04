@@ -42,4 +42,41 @@ public class BinarizationProcessor extends ColorProcessor {
 
         return binarize(image, threshold);
     }
+
+    public WritableImage meanIterativeSelection(WritableImage image) {
+        image = turnToGreyscale(image);
+        Histogram histogram = HistogramProcessor.getInstance().getHistogram(image);
+        int[] hist = histogram.getHistogram();
+
+        int threshold, newThreshold = 128;
+        long totalWhite, totalBlack, countWhite, countBlack;
+        double meanWhite, meanBlack;
+
+        do {
+            threshold = newThreshold;
+
+            totalWhite = totalBlack = countWhite = countBlack = 0;
+            for (int i = 0; i < hist.length; i++) {
+                if (i < threshold) {
+                    totalBlack += hist[i] * i;
+                    countBlack += hist[i];
+                } else {
+                    totalWhite += hist[i] * i;
+                    countWhite += hist[i];
+                }
+            }
+
+            meanWhite = ((double) totalWhite / countWhite);
+            meanBlack = ((double) totalBlack / countBlack);
+
+            newThreshold = (int) Math.abs((meanWhite + meanBlack) / 2);
+
+            System.out.println("Calculated threshold: " + newThreshold);
+        }
+        while (Math.abs((int) meanWhite - (int) meanBlack) != 0 && threshold != newThreshold);
+
+        System.out.println("Found threshold: " + newThreshold);
+
+        return binarize(image, newThreshold);
+    }
 }

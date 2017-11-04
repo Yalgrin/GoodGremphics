@@ -271,4 +271,8 @@ public class MainWindowController extends AbstractController {
         });
         return dialog;
     }
+
+    public void meanIterativeSelection(ActionEvent actionEvent) {
+        updateUI(BinarizationProcessor.getInstance().meanIterativeSelection(currentViewController.getImage()));
+    }
 }

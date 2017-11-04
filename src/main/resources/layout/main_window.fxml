@@ -48,6 +48,8 @@
                                           text="Manual"/>
                                 <MenuItem mnemonicParsing="false" onAction="#percentBlackBinarization"
                                           text="Percent black selection"/>
+                                <MenuItem mnemonicParsing="false" onAction="#meanIterativeSelection"
+                                          text="Mean iterative selection"/>
                             </items>
                         </Menu>
                     </menus>
