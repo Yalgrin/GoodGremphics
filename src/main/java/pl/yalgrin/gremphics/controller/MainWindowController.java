@@ -279,4 +279,8 @@ public class MainWindowController extends AbstractController {
     public void entropySelection(ActionEvent actionEvent) {
         updateUI(BinarizationProcessor.getInstance().entropySelection(currentViewController.getImage()));
     }
+
+    public void goToBezierView(ActionEvent actionEvent) throws IOException {
+        loadContentPane("layout/bezier_view.fxml", controllerData, null);
+    }
 }
