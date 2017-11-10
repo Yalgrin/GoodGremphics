@@ -30,7 +30,7 @@
                                           text="RGB/CMYK conversion"/>
                                 <MenuItem mnemonicParsing="false" onAction="#goToRgbCube" text="RGB cube"/>
                                 <MenuItem mnemonicParsing="false" onAction="#goToHsvCone" text="HSV cone"/>
-                                <MenuItem mnemonicParsing="false" onAction="#goToBezierView" text="Shape view"/>
+                                <MenuItem mnemonicParsing="false" onAction="#goToBezierView" text="Bezier curve view"/>
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Histogram">

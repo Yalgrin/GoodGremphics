@@ -1,5 +1,6 @@
 package pl.yalgrin.gremphics.control;
 
+import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
@@ -38,5 +39,9 @@ public class BezierCanvas extends Pane {
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         graphicsContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         bezierCurve.draw(graphicsContext);
+    }
+
+    public ObservableList<BezierPoint> getPoints() {
+        return bezierCurve.getPoints();
     }
 }
