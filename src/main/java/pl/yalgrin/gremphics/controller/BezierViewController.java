@@ -12,6 +12,8 @@ import pl.yalgrin.gremphics.control.BezierPoint;
 import pl.yalgrin.gremphics.shape.NamedProperty;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class BezierViewController extends AbstractController {
@@ -22,6 +24,8 @@ public class BezierViewController extends AbstractController {
     public VBox propertyPane;
 
     private BezierCanvas canvas;
+
+    private Map<Spinner<Integer>, IntegerProperty> spinnerIntegerPropertyMap = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -36,13 +40,16 @@ public class BezierViewController extends AbstractController {
     }
 
     private void rebuildSidebar() {
+        spinnerIntegerPropertyMap.clear();
         propertyPane.getChildren().clear();
         for (BezierPoint point : canvas.getPoints()) {
             propertyPane.getChildren().add(new Label(Integer.toString(canvas.getPoints().indexOf(point))));
             for (NamedProperty namedProperty : point.getBoundProperties()) {
                 Spinner<Integer> spinner = new Spinner<>(0, 1000, 0, 1);
                 spinner.setEditable(true);
-                IntegerProperty.integerProperty(spinner.getValueFactory().valueProperty()).bindBidirectional(namedProperty.propertyProperty());
+                IntegerProperty spinnerProperty = IntegerProperty.integerProperty(spinner.getValueFactory().valueProperty());
+                spinnerIntegerPropertyMap.put(spinner, spinnerProperty);
+                spinnerProperty.bindBidirectional(namedProperty.propertyProperty());
                 propertyPane.getChildren().add(spinner);
             }
         }

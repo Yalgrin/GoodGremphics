@@ -6,13 +6,11 @@ import javafx.scene.shape.Circle;
 import pl.yalgrin.gremphics.shape.NamedProperty;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BezierPoint extends Circle {
     private boolean isDragging = false;
     private double curShiftX, curShiftY;
-    private NamedProperty namedPropertyX, namedPropertyY;
     private List<NamedProperty> namedProperties = new ArrayList<>();
 
     public BezierPoint(BezierCurve bezierCurve, int x, int y) {
@@ -45,9 +43,14 @@ public class BezierPoint extends Circle {
         });
 
         setOnMouseReleased(e -> isDragging = false);
+
+        NamedProperty namedPropertyX = new NamedProperty("X", centerXProperty());
+        NamedProperty namedPropertyY = new NamedProperty("Y", centerYProperty());
+        namedProperties.add(namedPropertyX);
+        namedProperties.add(namedPropertyY);
     }
 
     public List<NamedProperty> getBoundProperties() {
-        return Arrays.asList(new NamedProperty("X", centerXProperty()), new NamedProperty("Y", centerYProperty()));
+        return namedProperties;
     }
 }

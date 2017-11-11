@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import pl.yalgrin.gremphics.util.Pair;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,71 +45,46 @@ public class BezierCurve {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.beginPath();
         graphicsContext.moveTo(points.get(0).getCenterX(), points.get(0).getCenterY());
-        int x, y;
-        for (double t = 0.0; t <= 1.0; t += 0.001) {
+        for (double t = 0.0; t <= 1.0; t += 0.002) {
             graphicsContext.lineTo(getCoord(t, Axis.X), getCoord(t, Axis.Y));
         }
         graphicsContext.stroke();
         graphicsContext.closePath();
     }
 
+    private static Map<Pair<Double, Pair<Integer, Integer>>, Double> valueCache;
+    private static Map<Pair<Integer, Integer>, BigDecimal> coeffCache;
+
+    static {
+        coeffCache = new HashMap<>();
+        valueCache = new HashMap<>();
+    }
+
     private double getCoord(double t, Axis axis) {
         double sum = 0.0;
-        for (int i = 0; i < points.size(); i++) {
-            sum += binomialCoeff(points.size() - 1, i).
-                    multiply(BigDecimal.valueOf(t).pow(i)).
-                    multiply(BigDecimal.valueOf(1 - t).pow(points.size() - i - 1)).
-                    multiply(BigDecimal.valueOf(axis.getValue(points.get(i)))).
-                    doubleValue();
+        int pointCount = points.size();
+        int degree = pointCount - 1;
+        for (int i = 0; i < pointCount; i++) {
+            sum += axis.getValue(points.get(i)) * getValue(t, degree, i);
         }
         return sum;
     }
 
-    private class TwoIntegers {
-        private int a, b;
-
-        public TwoIntegers(int a, int b) {
-            this.a = a;
-            this.b = b;
+    private static double getValue(double t, int degree, int i) {
+        Pair<Double, Pair<Integer, Integer>> key = new Pair<>(t, new Pair<>(degree, i));
+        if (valueCache.containsKey(key)) {
+            return valueCache.get(key);
         }
 
-        public int getA() {
-            return a;
-        }
-
-        public void setA(int a) {
-            this.a = a;
-        }
-
-        public int getB() {
-            return b;
-        }
-
-        public void setB(int b) {
-            this.b = b;
-        }
-
-        @Override public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            TwoIntegers that = (TwoIntegers) o;
-
-            if (a != that.a) return false;
-            return b == that.b;
-        }
-
-        @Override public int hashCode() {
-            int result = a;
-            result = 31 * result + b;
-            return result;
-        }
+        double v = binomialCoeff(degree, i).
+                multiply(BigDecimal.valueOf(t).pow(i)).
+                multiply(BigDecimal.valueOf(1 - t).pow(degree - i)).doubleValue();
+        valueCache.put(key, v);
+        return v;
     }
 
-    private Map<TwoIntegers, BigDecimal> coeffCache = new HashMap<>();
-
-    private BigDecimal binomialCoeff(int n, int k) {
-        TwoIntegers nk = new TwoIntegers(n, k);
+    private static BigDecimal binomialCoeff(int n, int k) {
+        Pair<Integer, Integer> nk = new Pair<>(n, k);
         if (coeffCache.containsKey(nk)) {
             return coeffCache.get(nk);
         }
@@ -117,7 +93,7 @@ public class BezierCurve {
         return res;
     }
 
-    private BigDecimal binomialCoeffInternal(int n, int k) {
+    private static BigDecimal binomialCoeffInternal(int n, int k) {
         if (n - k < k) {
             return binomialCoeff(n, n - k);
         }
