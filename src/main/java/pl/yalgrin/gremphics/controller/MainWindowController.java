@@ -283,4 +283,8 @@ public class MainWindowController extends AbstractController {
     public void goToBezierView(ActionEvent actionEvent) throws IOException {
         loadContentPane("layout/bezier_view.fxml", controllerData, null);
     }
+
+    public void goToTransformationView(ActionEvent actionEvent) throws IOException {
+        loadContentPane("layout/transformation_view.fxml", controllerData, null);
+    }
 }
