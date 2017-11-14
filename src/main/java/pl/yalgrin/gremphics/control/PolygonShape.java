@@ -43,8 +43,16 @@ public class PolygonShape {
         gc.closePath();
     }
 
-    public void onPointDragged() {
-        canvas.draw();
+    public void onPointDragged(PolygonPoint point, double x, double y) {
+        canvas.onPointDragged(point, x, y);
+    }
+
+    public void onPointDragStarted(PolygonPoint point, double x, double y) {
+        canvas.onPointDragStarted(point, x, y);
+    }
+
+    public void onPointDragStopped(PolygonPoint point, double x, double y) {
+        canvas.onPointDragStopped(point, x, y);
     }
 
     public void onPointRemoved(PolygonPoint point) {
@@ -52,9 +60,28 @@ public class PolygonShape {
         canvas.onPointRemoved(point);
     }
 
+    public void onPointClicked(PolygonPoint point) {
+        canvas.onPointClicked(point);
+    }
+
     public PolygonPoint addPoint(int x, int y) {
         PolygonPoint point = new PolygonPoint(this, x, y);
         points.add(point);
         return point;
+    }
+
+    public void setMode(PolygonCanvas.Mode mode) {
+        canvas.setMode(mode);
+    }
+
+    public PolygonCanvas.Mode getMode() {
+        return canvas.getMode();
+    }
+
+    public void translate(double x, double y) {
+        for (PolygonPoint point : points) {
+            point.setX(point.getX() + x);
+            point.setY(point.getY() + y);
+        }
     }
 }

@@ -3,22 +3,20 @@ package pl.yalgrin.gremphics.control;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import pl.yalgrin.gremphics.shape.NamedProperty;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PolygonPoint extends Circle {
     private boolean isDragging = false;
     private double curShiftX, curShiftY;
-    private List<NamedProperty> namedProperties = new ArrayList<>();
+    private PolygonShape polygonShape;
 
     public PolygonPoint(PolygonShape polygonShape, int x, int y) {
         super(x, y, 5);
         setFill(Color.BLACK);
 
-        centerXProperty().addListener((observable, oldValue, newValue) -> polygonShape.onPointDragged());
-        centerYProperty().addListener((observable, oldValue, newValue) -> polygonShape.onPointDragged());
+        this.polygonShape = polygonShape;
+
+//        centerXProperty().addListener((observable, oldValue, newValue) -> polygonShape.onPointDragged());
+//        centerYProperty().addListener((observable, oldValue, newValue) -> polygonShape.onPointDragged());
 
         setOnMouseDragged(e -> {
             if (!isDragging || e.getButton() != MouseButton.PRIMARY) {
@@ -26,12 +24,12 @@ public class PolygonPoint extends Circle {
             }
             curShiftX = e.getX();
             curShiftY = e.getY();
-            setCenterX(curShiftX);
-            setCenterY(curShiftY);
+            polygonShape.onPointDragged(this, curShiftX, curShiftY);
         });
 
         setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
+                polygonShape.onPointDragStarted(this, e.getX(), e.getY());
                 isDragging = true;
             }
         });
@@ -39,19 +37,15 @@ public class PolygonPoint extends Circle {
         setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 polygonShape.onPointRemoved(this);
+            } else if (e.getButton() == MouseButton.PRIMARY) {
+                polygonShape.onPointClicked(this);
             }
         });
 
-        setOnMouseReleased(e -> isDragging = false);
-
-        NamedProperty namedPropertyX = new NamedProperty("X", centerXProperty());
-        NamedProperty namedPropertyY = new NamedProperty("Y", centerYProperty());
-        namedProperties.add(namedPropertyX);
-        namedProperties.add(namedPropertyY);
-    }
-
-    public List<NamedProperty> getBoundProperties() {
-        return namedProperties;
+        setOnMouseReleased(e -> {
+            isDragging = false;
+            polygonShape.onPointDragStopped(this, e.getX(), e.getY());
+        });
     }
 
     public double getX() {
@@ -60,5 +54,17 @@ public class PolygonPoint extends Circle {
 
     public double getY() {
         return getCenterY();
+    }
+
+    public void setX(double val) {
+        setCenterX(val);
+    }
+
+    public void setY(double val) {
+        setCenterY(val);
+    }
+
+    public PolygonShape getShape() {
+        return polygonShape;
     }
 }
