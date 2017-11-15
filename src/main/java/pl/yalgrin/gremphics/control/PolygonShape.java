@@ -84,4 +84,53 @@ public class PolygonShape {
             point.setY(point.getY() + y);
         }
     }
+
+    public void rotate(double x0, double y0, double startX, double startY, double rotationX, double rotationY) {
+        rotate(x0, y0, radsBetween(x0, y0, startX, startY, rotationX, rotationY));
+    }
+
+    public void rotate(double x0, double y0, double rad) {
+        for (PolygonPoint point : points) {
+            double x = point.getX();
+            double y = point.getY();
+            point.setX(x0 + (x - x0) * Math.cos(rad) - (y - y0) * Math.sin(rad));
+            point.setY(y0 + (x - x0) * Math.sin(rad) + (y - y0) * Math.cos(rad));
+        }
+    }
+
+    public void scale(double x0, double y0, double startX, double startY, double endX, double endY) {
+        double scaleX = (endX - x0) / (startX - x0);
+        double scaleY = (endY - y0) / (startY - y0);
+        if (startX == x0) {
+            scaleX = 0.0;
+        }
+        if (startY == y0) {
+            scaleY = 0.0;
+        }
+        scale(x0, y0, scaleX, scaleY);
+    }
+
+    public void scale(double x0, double y0, double scaleX, double scaleY) {
+        if (Double.isNaN(scaleX)) {
+            scaleX = 0.0;
+        }
+        if (Double.isNaN(scaleY)) {
+            scaleY = 0.0;
+        }
+        System.out.println("KX: " + scaleX + ", KY: " + scaleY);
+        for (PolygonPoint point : points) {
+            double x = point.getX();
+            double y = point.getY();
+            point.setX(x * scaleX + (1 - scaleX) * x0);
+            point.setY(y * scaleY + (1 - scaleY) * y0);
+        }
+    }
+
+    private double radsBetween(double centerX, double centerY, double firstX, double firstY, double secondX, double secondY) {
+        double rad = Math.atan2(centerX - firstX, centerY - firstY) - Math.atan2(centerX - secondX, centerY - secondY);
+        if (rad < 0.0) {
+            rad += Math.PI * 2;
+        }
+        return rad;
+    }
 }

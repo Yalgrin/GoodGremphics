@@ -24,8 +24,8 @@ public class PolygonCanvas extends Pane {
     private ObjectProperty<PolygonShape> selectedShape = new SimpleObjectProperty<>(null);
     private ObjectProperty<Mode> modeProperty = new SimpleObjectProperty<>(Mode.ADD_POINT_MODE);
     private List<PolygonShape> shapes = new ArrayList<>();
-    private double lastX, lastY;
-    private boolean dragStarted = true;
+    private double centerX, centerY, lastX, lastY;
+    private boolean dragStarted = true, lockedIn = false;
 
     public PolygonCanvas() {
         canvas = new Canvas(1000, 1000);
@@ -51,9 +51,10 @@ public class PolygonCanvas extends Pane {
                 return;
             }
 
+            centerX = lastX = e.getX();
+            centerY = lastY = e.getY();
             dragStarted = true;
-            lastX = e.getX();
-            lastY = e.getY();
+            lockedIn = false;
         });
 
         canvas.setOnMouseReleased(e -> {
@@ -65,10 +66,37 @@ public class PolygonCanvas extends Pane {
                 return;
             }
 
-            getSelectedShape().translate(e.getX() - lastX, e.getY() - lastY);
+            if (getMode() == Mode.TRANSLATE_MODE) {
+                getSelectedShape().translate(e.getX() - lastX, e.getY() - lastY);
+                draw();
+            } else if (getMode() == Mode.ROTATE_MODE) {
+                if (lockedIn) {
+                    getSelectedShape().rotate(centerX, centerY, lastX, lastY, e.getX(), e.getY());
+                    draw();
+                } else {
+                    if (Math.sqrt(Math.pow(centerX - e.getX(), 2) + Math.pow(centerY - e.getY(), 2)) > 10.0) {
+                        lockedIn = true;
+                    }
+                }
+            } else if (getMode() == Mode.SCALE_MODE) {
+                if (lockedIn) {
+                    if (!(Math.abs(centerX - e.getX()) < 5 || Math.abs(centerY - e.getY()) < 5)) {
+                        getSelectedShape().scale(centerX, centerY, lastX, lastY, e.getX(), e.getY());
+                        draw();
+                    } else {
+                        return;
+                    }
+                } else {
+                    if (Math.sqrt(Math.pow(centerX - e.getX(), 2) + Math.pow(centerY - e.getY(), 2)) > 50) {
+                        lockedIn = true;
+                        lastX = centerX + 100;
+                        lastY = centerY + 100;
+                        return;
+                    }
+                }
+            }
             lastX = e.getX();
             lastY = e.getY();
-            draw();
         });
 
         getChildren().addAll(canvas);
@@ -99,7 +127,7 @@ public class PolygonCanvas extends Pane {
     }
 
     public void onPointDragged(PolygonPoint point, double x, double y) {
-        if (getMode() == Mode.SELECT_MODE || getMode() == Mode.ADD_POINT_MODE) {
+        if (getMode() == Mode.ADD_POINT_MODE) {
             point.setX(x);
             point.setY(y);
             draw();
@@ -157,7 +185,7 @@ public class PolygonCanvas extends Pane {
         shapes.remove(shape);
         draw();
 
-        if (getMode() != Mode.SELECT_MODE || getMode() != Mode.ADD_POINT_MODE) {
+        if (getMode() != Mode.SELECT_MODE && getMode() != Mode.ADD_POINT_MODE) {
             if (getShapes().isEmpty()) {
                 setMode(Mode.ADD_POINT_MODE);
             } else {
