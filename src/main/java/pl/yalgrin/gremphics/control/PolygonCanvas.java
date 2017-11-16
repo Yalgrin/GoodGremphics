@@ -197,4 +197,18 @@ public class PolygonCanvas extends Pane {
     public List<PolygonShape> getShapes() {
         return shapes;
     }
+
+    public void setShapes(List<PolygonShape> shapes) {
+        this.shapes = shapes;
+
+        getChildren().clear();
+        getChildren().add(canvas);
+        for (PolygonShape shape : shapes) {
+            for (PolygonPoint point : shape.getPoints()) {
+                getChildren().add(point);
+                point.toFront();
+            }
+        }
+        draw();
+    }
 }

@@ -14,6 +14,8 @@
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#loadFile" text="Open"/>
                                 <MenuItem mnemonicParsing="false" onAction="#saveFile" text="Save as"/>
+                                <MenuItem mnemonicParsing="false" onAction="#loadShapes" text="Open shape"/>
+                                <MenuItem mnemonicParsing="false" onAction="#saveShapes" text="Save shape as"/>
                                 <MenuItem mnemonicParsing="false" onAction="#exitApplication" text="Close"/>
                             </items>
                         </Menu>

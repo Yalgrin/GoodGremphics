@@ -117,7 +117,6 @@ public class PolygonShape {
         if (Double.isNaN(scaleY)) {
             scaleY = 0.0;
         }
-        System.out.println("KX: " + scaleX + ", KY: " + scaleY);
         for (PolygonPoint point : points) {
             double x = point.getX();
             double y = point.getY();

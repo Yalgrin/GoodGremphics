@@ -15,6 +15,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pl.yalgrin.gremphics.io.ImageIO;
 import pl.yalgrin.gremphics.io.ImageSaveParam;
+import pl.yalgrin.gremphics.io.PolygonIO;
 import pl.yalgrin.gremphics.processing.BinarizationProcessor;
 import pl.yalgrin.gremphics.processing.HistogramProcessor;
 
@@ -286,5 +287,72 @@ public class MainWindowController extends AbstractController {
 
     public void goToTransformationView(ActionEvent actionEvent) throws IOException {
         loadContentPane("layout/transformation_view.fxml", controllerData, null);
+    }
+
+    public void loadShapes(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open shapes file");
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            try {
+                loadContentPane("layout/transformation_view.fxml", c -> {
+                    TransformationViewController controller = (TransformationViewController) c;
+                    try {
+                        PolygonIO.readShapes(file, controller.getCanvas());
+                        controller.updateButtonVisibility(controller.getCanvas().getMode());
+                    } catch (IOException ex) {
+                        final StringWriter sw = new StringWriter();
+                        final PrintWriter pw = new PrintWriter(sw, true);
+                        ex.printStackTrace(pw);
+
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setHeaderText("Error during load occured!");
+                        alert.setContentText(ex.getMessage());
+                        alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
+                        alert.showAndWait();
+                    }
+                });
+            } catch (IOException ex) {
+                final StringWriter sw = new StringWriter();
+                final PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Error during load occured!");
+                alert.setContentText(ex.getMessage());
+                alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
+                alert.showAndWait();
+            }
+        }
+    }
+
+    public void saveShapes(ActionEvent actionEvent) {
+        if (!(currentViewController instanceof TransformationViewController)) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error during save occured!");
+            alert.setContentText("Wrong view!");
+            alert.showAndWait();
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save shapes file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Shapes file", "shapes"));
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            TransformationViewController c = (TransformationViewController) currentViewController;
+            try {
+                PolygonIO.writeShapes(file, c.getCanvas().getShapes());
+            } catch (IOException ex) {
+                final StringWriter sw = new StringWriter();
+                final PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Error during save occured!");
+                alert.setContentText(ex.getMessage());
+                alert.getDialogPane().setExpandableContent(new ScrollPane(new TextArea(sw.getBuffer().toString())));
+                alert.showAndWait();
+            }
+        }
     }
 }

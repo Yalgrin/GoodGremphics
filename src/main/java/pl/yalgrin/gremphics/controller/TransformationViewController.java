@@ -3,15 +3,17 @@ package pl.yalgrin.gremphics.controller;
 import javafx.beans.property.IntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Spinner;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import pl.yalgrin.gremphics.control.PolygonCanvas;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class TransformationViewController extends AbstractController {
@@ -27,7 +29,9 @@ public class TransformationViewController extends AbstractController {
     public Button translateModeButton;
     public Button rotateModeButton;
     public Button scaleModeButton;
-    public Button operationDialogButton;
+    public Button translateDialogButton;
+    public Button rotateDialogButton;
+    public Button scaleDialogPressed;
 
     private PolygonCanvas canvas;
 
@@ -46,11 +50,13 @@ public class TransformationViewController extends AbstractController {
         canvas.selectedShapeProperty().addListener((observable, oldValue, newValue) -> updateButtonVisibility(canvas.getMode()));
     }
 
-    private void updateButtonVisibility(PolygonCanvas.Mode mode) {
+    public void updateButtonVisibility(PolygonCanvas.Mode mode) {
         if (canvas.getSelectedShape() != null) {
             newShapeButton.setDisable(false);
             deleteShapeButton.setDisable(false);
-            operationDialogButton.setDisable(false);
+            translateDialogButton.setDisable(false);
+            rotateDialogButton.setDisable(false);
+            scaleDialogPressed.setDisable(false);
 
             switch (mode) {
                 case SELECT_MODE:
@@ -97,7 +103,10 @@ public class TransformationViewController extends AbstractController {
             translateModeButton.setDisable(true);
             rotateModeButton.setDisable(true);
             scaleModeButton.setDisable(true);
-            operationDialogButton.setDisable(true);
+            translateDialogButton.setDisable(true);
+            rotateDialogButton.setDisable(true);
+            scaleDialogPressed.setDisable(true);
+
         }
     }
 
@@ -129,6 +138,117 @@ public class TransformationViewController extends AbstractController {
         canvas.setMode(PolygonCanvas.Mode.SCALE_MODE);
     }
 
-    public void operationDialogPressed(ActionEvent actionEvent) {
+    public void translateDialogPressed(ActionEvent actionEvent) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Translation");
+        dialog.setHeaderText("Specify vector");
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        Label labelX = new Label("X");
+        Label labelY = new Label("Y");
+        Spinner<Integer> spinnerX = new Spinner<>(0, 1000, 0, 1);
+        spinnerX.setEditable(true);
+        Spinner<Integer> spinnerY = new Spinner<>(0, 1000, 0, 1);
+        spinnerY.setEditable(true);
+
+        grid.add(labelX, 0, 0);
+        grid.add(labelY, 0, 1);
+        grid.add(spinnerX, 1, 0);
+        grid.add(spinnerY, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        Optional<ButtonType> result = dialog.showAndWait();
+        result.ifPresent(b -> {
+            if (b == ButtonType.OK) {
+                canvas.getSelectedShape().translate(spinnerX.getValue(), spinnerY.getValue());
+                canvas.draw();
+            }
+        });
+    }
+
+    public void rotateDialogPressed(ActionEvent actionEvent) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Translation");
+        dialog.setHeaderText("Specify vector");
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        Label labelX = new Label("X");
+        Label labelY = new Label("Y");
+        Spinner<Integer> spinnerX = new Spinner<>(0, 1000, 0, 1);
+        spinnerX.setEditable(true);
+        Spinner<Integer> spinnerY = new Spinner<>(0, 1000, 0, 1);
+        spinnerY.setEditable(true);
+
+        Label labelAngle = new Label("Angle");
+        Spinner<Integer> spinnerAngle = new Spinner<>(0, 359, 0, 1);
+        spinnerAngle.setEditable(true);
+
+        grid.add(labelX, 0, 0);
+        grid.add(labelY, 0, 1);
+        grid.add(spinnerX, 1, 0);
+        grid.add(spinnerY, 1, 1);
+
+        grid.add(labelAngle, 0, 2);
+        grid.add(spinnerAngle, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+        Optional<ButtonType> result = dialog.showAndWait();
+        result.ifPresent(b -> {
+            if (b == ButtonType.OK) {
+                canvas.getSelectedShape().rotate(spinnerX.getValue(), spinnerY.getValue(), spinnerAngle.getValue() * Math.PI / 180);
+                canvas.draw();
+            }
+        });
+    }
+
+    public void scaleDialogPressed(ActionEvent actionEvent) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Translation");
+        dialog.setHeaderText("Specify vector");
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        Label labelX = new Label("X");
+        Label labelY = new Label("Y");
+        Spinner<Integer> spinnerX = new Spinner<>(0, 1000, 0, 1);
+        spinnerX.setEditable(true);
+        Spinner<Integer> spinnerY = new Spinner<>(0, 1000, 0, 1);
+        spinnerY.setEditable(true);
+
+        Label labelScale = new Label("Scale");
+        Spinner<Double> spinnerScale = new Spinner<>(0.1, 100.0, 1.0, 0.1);
+        spinnerScale.setEditable(true);
+
+        grid.add(labelX, 0, 0);
+        grid.add(labelY, 0, 1);
+        grid.add(spinnerX, 1, 0);
+        grid.add(spinnerY, 1, 1);
+
+        grid.add(labelScale, 0, 2);
+        grid.add(spinnerScale, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+        Optional<ButtonType> result = dialog.showAndWait();
+        result.ifPresent(b -> {
+            if (b == ButtonType.OK) {
+                canvas.getSelectedShape().scale(spinnerX.getValue(), spinnerY.getValue(), spinnerScale.getValue(), spinnerScale.getValue());
+                canvas.draw();
+            }
+        });
+    }
+
+    public PolygonCanvas getCanvas() {
+        return canvas;
     }
 }
