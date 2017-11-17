@@ -59,6 +59,20 @@
                                           text="Entropy selection"/>
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Morphology">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#dilation"
+                                          text="Dilation"/>
+                                <MenuItem mnemonicParsing="false" onAction="#erosion"
+                                          text="Erosion"/>
+                                <MenuItem mnemonicParsing="false" onAction="#opening"
+                                          text="Opening"/>
+                                <MenuItem mnemonicParsing="false" onAction="#closing"
+                                          text="Closing"/>
+                                <MenuItem mnemonicParsing="false" onAction="#hitOrMiss"
+                                          text="Hit or miss"/>
+                            </items>
+                        </Menu>
                     </menus>
                 </MenuBar>
             </top>

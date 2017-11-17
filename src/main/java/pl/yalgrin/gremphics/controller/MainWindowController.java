@@ -18,6 +18,8 @@ import pl.yalgrin.gremphics.io.ImageSaveParam;
 import pl.yalgrin.gremphics.io.PolygonIO;
 import pl.yalgrin.gremphics.processing.BinarizationProcessor;
 import pl.yalgrin.gremphics.processing.HistogramProcessor;
+import pl.yalgrin.gremphics.processing.MorphologyMatrix;
+import pl.yalgrin.gremphics.processing.MorphologyProcessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -354,5 +356,81 @@ public class MainWindowController extends AbstractController {
                 alert.showAndWait();
             }
         }
+    }
+
+    public void dilation(ActionEvent actionEvent) {
+        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
+        boolean[][] matrix = morphologyMatrix.getMatrix();
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 1; j <= 3; j++) {
+                matrix[i][j] = true;
+            }
+        }
+        updateUI(MorphologyProcessor.getInstance().dilation(currentViewController.getImage(), morphologyMatrix));
+    }
+
+    public void erosion(ActionEvent actionEvent) {
+        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
+        boolean[][] matrix = morphologyMatrix.getMatrix();
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 1; j <= 3; j++) {
+                matrix[i][j] = true;
+            }
+        }
+        updateUI(MorphologyProcessor.getInstance().erosion(currentViewController.getImage(), morphologyMatrix));
+    }
+
+    public void opening(ActionEvent actionEvent) {
+        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
+        boolean[][] matrix = morphologyMatrix.getMatrix();
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 1; j <= 3; j++) {
+                matrix[i][j] = true;
+            }
+        }
+        updateUI(MorphologyProcessor.getInstance().opening(currentViewController.getImage(), morphologyMatrix));
+    }
+
+    public void closing(ActionEvent actionEvent) {
+        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
+        boolean[][] matrix = morphologyMatrix.getMatrix();
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 1; j <= 3; j++) {
+                matrix[i][j] = true;
+            }
+        }
+        updateUI(MorphologyProcessor.getInstance().closing(currentViewController.getImage(), morphologyMatrix));
+    }
+
+    public void hitOrMiss(ActionEvent actionEvent) {
+        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
+        MorphologyMatrix morphologyMatrix2 = new MorphologyMatrix();
+        boolean[][] matrix = morphologyMatrix.getMatrix();
+        boolean[][] matrix2 = morphologyMatrix2.getMatrix();
+        matrix[1][2] = matrix[2][2] = matrix[2][3] = true;
+        matrix2[2][1] = matrix2[3][1] = matrix2[3][2] = true;
+
+        MorphologyMatrix morphologyMatrix3 = new MorphologyMatrix();
+        MorphologyMatrix morphologyMatrix4 = new MorphologyMatrix();
+        boolean[][] matrix3 = morphologyMatrix3.getMatrix();
+        boolean[][] matrix4 = morphologyMatrix4.getMatrix();
+        matrix3[1][2] = matrix3[2][2] = matrix3[2][1] = true;
+        matrix4[2][3] = matrix4[3][3] = matrix4[3][2] = true;
+
+        MorphologyMatrix morphologyMatrix5 = new MorphologyMatrix();
+        MorphologyMatrix morphologyMatrix6 = new MorphologyMatrix();
+        boolean[][] matrix5 = morphologyMatrix5.getMatrix();
+        boolean[][] matrix6 = morphologyMatrix6.getMatrix();
+        matrix5[2][1] = matrix5[2][2] = matrix5[3][2] = true;
+        matrix6[1][2] = matrix6[1][3] = matrix6[2][3] = true;
+
+        MorphologyMatrix morphologyMatrix7 = new MorphologyMatrix();
+        MorphologyMatrix morphologyMatrix8 = new MorphologyMatrix();
+        boolean[][] matrix7 = morphologyMatrix7.getMatrix();
+        boolean[][] matrix8 = morphologyMatrix8.getMatrix();
+        matrix7[2][2] = matrix7[2][3] = matrix7[3][2] = true;
+        matrix8[1][1] = matrix8[1][2] = matrix8[2][1] = true;
+
+        updateUI(MorphologyProcessor.getInstance().hitOrMiss(currentViewController.getImage(), morphologyMatrix, morphologyMatrix2, morphologyMatrix3, morphologyMatrix4, morphologyMatrix5, morphologyMatrix6, morphologyMatrix7, morphologyMatrix8));
     }
 }
