@@ -69,8 +69,10 @@
                                           text="Opening"/>
                                 <MenuItem mnemonicParsing="false" onAction="#closing"
                                           text="Closing"/>
-                                <MenuItem mnemonicParsing="false" onAction="#hitOrMiss"
-                                          text="Hit or miss"/>
+                                <MenuItem mnemonicParsing="false" onAction="#thinning"
+                                          text="Thinning"/>
+                                <MenuItem mnemonicParsing="false" onAction="#thickening"
+                                          text="Thickening"/>
                             </items>
                         </Menu>
                     </menus>

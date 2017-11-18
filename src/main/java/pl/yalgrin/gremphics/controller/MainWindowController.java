@@ -359,78 +359,81 @@ public class MainWindowController extends AbstractController {
     }
 
     public void dilation(ActionEvent actionEvent) {
-        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
-        boolean[][] matrix = morphologyMatrix.getMatrix();
-        for (int i = 1; i <= 3; i++) {
-            for (int j = 1; j <= 3; j++) {
-                matrix[i][j] = true;
-            }
-        }
-        updateUI(MorphologyProcessor.getInstance().dilation(currentViewController.getImage(), morphologyMatrix));
+        Dialog<MorphologyMatrix> dialog = getMatrixDialog();
+        Optional<MorphologyMatrix> result = dialog.showAndWait();
+        result.ifPresent(m -> {
+            updateUI(MorphologyProcessor.getInstance().dilation(currentViewController.getImage(), m));
+        });
     }
 
     public void erosion(ActionEvent actionEvent) {
-        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
-        boolean[][] matrix = morphologyMatrix.getMatrix();
-        for (int i = 1; i <= 3; i++) {
-            for (int j = 1; j <= 3; j++) {
-                matrix[i][j] = true;
-            }
-        }
-        updateUI(MorphologyProcessor.getInstance().erosion(currentViewController.getImage(), morphologyMatrix));
+        Dialog<MorphologyMatrix> dialog = getMatrixDialog();
+        Optional<MorphologyMatrix> result = dialog.showAndWait();
+        result.ifPresent(m -> {
+            updateUI(MorphologyProcessor.getInstance().erosion(currentViewController.getImage(), m));
+        });
     }
 
     public void opening(ActionEvent actionEvent) {
-        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
-        boolean[][] matrix = morphologyMatrix.getMatrix();
-        for (int i = 1; i <= 3; i++) {
-            for (int j = 1; j <= 3; j++) {
-                matrix[i][j] = true;
-            }
-        }
-        updateUI(MorphologyProcessor.getInstance().opening(currentViewController.getImage(), morphologyMatrix));
+        Dialog<MorphologyMatrix> dialog = getMatrixDialog();
+        Optional<MorphologyMatrix> result = dialog.showAndWait();
+        result.ifPresent(m -> {
+            updateUI(MorphologyProcessor.getInstance().opening(currentViewController.getImage(), m));
+        });
     }
 
     public void closing(ActionEvent actionEvent) {
-        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
-        boolean[][] matrix = morphologyMatrix.getMatrix();
-        for (int i = 1; i <= 3; i++) {
-            for (int j = 1; j <= 3; j++) {
-                matrix[i][j] = true;
-            }
-        }
-        updateUI(MorphologyProcessor.getInstance().closing(currentViewController.getImage(), morphologyMatrix));
+        Dialog<MorphologyMatrix> dialog = getMatrixDialog();
+        Optional<MorphologyMatrix> result = dialog.showAndWait();
+        result.ifPresent(m -> {
+            updateUI(MorphologyProcessor.getInstance().closing(currentViewController.getImage(), m));
+        });
     }
 
-    public void hitOrMiss(ActionEvent actionEvent) {
-        MorphologyMatrix morphologyMatrix = new MorphologyMatrix();
-        MorphologyMatrix morphologyMatrix2 = new MorphologyMatrix();
-        boolean[][] matrix = morphologyMatrix.getMatrix();
-        boolean[][] matrix2 = morphologyMatrix2.getMatrix();
-        matrix[1][2] = matrix[2][2] = matrix[2][3] = true;
-        matrix2[2][1] = matrix2[3][1] = matrix2[3][2] = true;
+    public void thinning(ActionEvent actionEvent) {
+        updateUI(MorphologyProcessor.getInstance().thinning(currentViewController.getImage()));
+    }
 
-        MorphologyMatrix morphologyMatrix3 = new MorphologyMatrix();
-        MorphologyMatrix morphologyMatrix4 = new MorphologyMatrix();
-        boolean[][] matrix3 = morphologyMatrix3.getMatrix();
-        boolean[][] matrix4 = morphologyMatrix4.getMatrix();
-        matrix3[1][2] = matrix3[2][2] = matrix3[2][1] = true;
-        matrix4[2][3] = matrix4[3][3] = matrix4[3][2] = true;
+    public void thickening(ActionEvent actionEvent) {
+        updateUI(MorphologyProcessor.getInstance().thickening(currentViewController.getImage()));
+    }
 
-        MorphologyMatrix morphologyMatrix5 = new MorphologyMatrix();
-        MorphologyMatrix morphologyMatrix6 = new MorphologyMatrix();
-        boolean[][] matrix5 = morphologyMatrix5.getMatrix();
-        boolean[][] matrix6 = morphologyMatrix6.getMatrix();
-        matrix5[2][1] = matrix5[2][2] = matrix5[3][2] = true;
-        matrix6[1][2] = matrix6[1][3] = matrix6[2][3] = true;
+    private Dialog<MorphologyMatrix> getMatrixDialog() {
+        Dialog<MorphologyMatrix> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Matrix");
+        dialog.setHeaderText("Set values of a matrix");
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
 
-        MorphologyMatrix morphologyMatrix7 = new MorphologyMatrix();
-        MorphologyMatrix morphologyMatrix8 = new MorphologyMatrix();
-        boolean[][] matrix7 = morphologyMatrix7.getMatrix();
-        boolean[][] matrix8 = morphologyMatrix8.getMatrix();
-        matrix7[2][2] = matrix7[2][3] = matrix7[3][2] = true;
-        matrix8[1][1] = matrix8[1][2] = matrix8[2][1] = true;
+        CheckBox[][] checkBoxes = new CheckBox[5][5];
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                checkBoxes[x][y] = new CheckBox();
+                grid.add(checkBoxes[x][y], y, x);
+            }
+        }
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 1; j <= 3; j++) {
+                checkBoxes[i][j].setSelected(true);
+            }
+        }
 
-        updateUI(MorphologyProcessor.getInstance().hitOrMiss(currentViewController.getImage(), morphologyMatrix, morphologyMatrix2, morphologyMatrix3, morphologyMatrix4, morphologyMatrix5, morphologyMatrix6, morphologyMatrix7, morphologyMatrix8));
+        dialog.getDialogPane().setContent(grid);
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK) {
+                MorphologyMatrix matrix = new MorphologyMatrix(5, 5);
+                boolean[][] matrixValues = matrix.getMatrix();
+                for (int y = 0; y < 5; y++) {
+                    for (int x = 0; x < 5; x++) {
+                        matrixValues[x][y] = checkBoxes[x][y].isSelected();
+                    }
+                }
+                return matrix;
+            }
+            return null;
+        });
+        return dialog;
     }
 }
